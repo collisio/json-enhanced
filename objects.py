@@ -1,56 +1,58 @@
+# ---- BASE OBJECT ----
+class JsonMaster:
+    def __new__(cls, data):
+
+        if isinstance(data, dict):
+            return JsonDict(data)
+        elif isinstance(data, list):
+            return JsonList(data)
+        elif isinstance(data, str):
+            return JsonStr(data)
+        elif isinstance(data, float):
+            return JsonFloat(data)
+        elif isinstance(data, int):
+            return JsonInt(data)
+        else:
+            raise TypeError(f"Wrong data's format: {type(data)}")
+
+    def _send_query(self):
+
+        childs = self._child_objects
+        if len(childs) < 1:
+            print(self)
+        for child in childs:
+            child._send_query()
+
+
 # ---- SINGLE OBJECTS ----
-class JsonStr(str):
+class JsonStr(str, JsonMaster):
     def __new__(cls, value):
         return super().__new__(cls, value)
 
     def __init__(self, value):
         self._child_objects = []
 
-    def _send_query(self):
 
-        childs = self._child_objects
-        if len(childs) < 1:
-            print(self)
-        for child in childs:
-            child._send_query()
-
-
-class JsonFloat(float):
+class JsonFloat(float, JsonMaster):
     def __new__(cls, value):
         return super().__new__(cls, value)
 
     def __init__(self, value):
         self._child_objects = []
 
-    def _send_query(self):
 
-        childs = self._child_objects
-        if len(childs) < 1:
-            print(self)
-        for child in childs:
-            child._send_query()
-
-
-class JsonInt(int):
+class JsonInt(int, JsonMaster):
     def __new__(cls, value):
         return super().__new__(cls, value)
 
     def __init__(self, value):
         self._child_objects = []
-
-    def _send_query(self):
-
-        childs = self._child_objects
-        if len(childs) < 1:
-            print(self)
-        for child in childs:
-            child._send_query()
 
 
 # ---- COMPOUND OBJECTS ----
 
 
-class JsonList(list):
+class JsonList(list, JsonMaster):
     def __init__(self, *args, **kwargs) -> None:
 
         super().__init__(*args, **kwargs)
@@ -81,16 +83,8 @@ class JsonList(list):
 
             self._child_objects.append(child)
 
-    def _send_query(self):
 
-        childs = self._child_objects
-        if len(childs) < 1:
-            print(self)
-        for child in childs:
-            child._send_query()
-
-
-class JsonDict(dict):
+class JsonDict(dict, JsonMaster):
     def __init__(self, *args, **kwargs) -> None:
 
         super().__init__(*args, **kwargs)
@@ -120,28 +114,3 @@ class JsonDict(dict):
                 raise TypeError(f"Wrong data's format: {type(value)}")
 
             self._child_objects.append(child)
-
-    def _send_query(self):
-
-        childs = self._child_objects
-        if len(childs) < 1:
-            print(self)
-        for child in childs:
-            child._send_query()
-
-
-class JsonMaster:
-    def __new__(cls, data):
-
-        if isinstance(data, dict):
-            return JsonDict(data)
-        elif isinstance(data, list):
-            return JsonList(data)
-        elif isinstance(data, str):
-            return JsonStr(data)
-        elif isinstance(data, float):
-            return JsonFloat(data)
-        elif isinstance(data, int):
-            return JsonInt(data)
-        else:
-            raise TypeError(f"Wrong data's format: {type(data)}")
