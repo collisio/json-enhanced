@@ -1,4 +1,3 @@
-
 # ---- SINGLE OBJECTS ----
 class JsonStr(str):
     pass
@@ -11,11 +10,11 @@ class JsonFloat(float):
 class JsonInt(int):
     pass
 
+
 # ---- COMPOUND OBJECTS ----
 
 
 class JsonList(list):
-
     def __init__(self, *args, **kwargs) -> None:
 
         super().__init__(*args, **kwargs)
@@ -26,32 +25,20 @@ class JsonList(list):
         for i, item in enumerate(self):
 
             if isinstance(item, list):
-
                 self.__setitem__(i, JsonList(item))
-
             elif isinstance(item, dict):
-
                 self.__setitem__(i, JsonDict(item))
-
             elif isinstance(item, str):
-
                 self.__setitem__(i, JsonStr(item))
-
             elif isinstance(item, float):
-
                 self.__setitem__(i, JsonFloat(item))
-
             elif isinstance(item, int):
-
                 self.__setitem__(i, JsonInt(item))
-
             else:
-
                 raise TypeError(f"wrong data's format: {type(item)}")
 
 
 class JsonDict(dict):
-
     def __init__(self, *args, **kwargs) -> None:
 
         super().__init__(*args, **kwargs)
@@ -87,7 +74,6 @@ class JsonDict(dict):
 
 
 class JsonMaster:
-
     def __new__(cls, data):
 
         if isinstance(data, dict):
