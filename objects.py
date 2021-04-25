@@ -1,18 +1,50 @@
 # ---- SINGLE OBJECTS ----
 class JsonStr(str):
-    pass
+    def __new__(cls, value):
+        return super().__new__(cls, value)
+
+    def __init__(self, value):
+        self._child_objects = []
+
+    def _send_query(self):
+
+        childs = self._child_objects
+        if len(childs) < 1:
+            print(self)
+        for child in childs:
+            child._send_query()
 
 
 class JsonFloat(float):
-    pass
+    def __new__(cls, value):
+        return super().__new__(cls, value)
+
+    def __init__(self, value):
+        self._child_objects = []
+
+    def _send_query(self):
+
+        childs = self._child_objects
+        if len(childs) < 1:
+            print(self)
+        for child in childs:
+            child._send_query()
 
 
 class JsonInt(int):
-    pass
+    def __new__(cls, value):
+        return super().__new__(cls, value)
 
+    def __init__(self, value):
+        self._child_objects = []
 
-class JsonBool(bool):
-    pass
+    def _send_query(self):
+
+        childs = self._child_objects
+        if len(childs) < 1:
+            print(self)
+        for child in childs:
+            child._send_query()
 
 
 # ---- COMPOUND OBJECTS ----
@@ -22,52 +54,80 @@ class JsonList(list):
     def __init__(self, *args, **kwargs) -> None:
 
         super().__init__(*args, **kwargs)
-        self._assign_types()
+        self._child_objects = []
+        self._assign_childs()
 
-    def _assign_types(self) -> None:
+    def _assign_childs(self) -> None:
 
         for i, item in enumerate(self):
 
             if isinstance(item, list):
-                self.__setitem__(i, JsonList(item))
+                child = JsonList(item)
+                self.__setitem__(i, child)
             elif isinstance(item, dict):
-                self.__setitem__(i, JsonDict(item))
+                child = JsonDict(item)
+                self.__setitem__(i, child)
             elif isinstance(item, str):
-                self.__setitem__(i, JsonStr(item))
+                child = JsonStr(item)
+                self.__setitem__(i, child)
             elif isinstance(item, float):
-                self.__setitem__(i, JsonFloat(item))
+                child = JsonFloat(item)
+                self.__setitem__(i, child)
             elif isinstance(item, int):
-                self.__setitem__(i, JsonInt(item))
-            elif isinstance(item, bool):
-                self.__setitem__(i, JsonBool(item))
+                child = JsonInt(item)
+                self.__setitem__(i, child)
             else:
-                raise TypeError(f"wrong data's format: {type(item)}")
+                raise TypeError(f"Wrong data's format: {type(item)}")
+
+            self._child_objects.append(child)
+
+    def _send_query(self):
+
+        childs = self._child_objects
+        if len(childs) < 1:
+            print(self)
+        for child in childs:
+            child._send_query()
 
 
 class JsonDict(dict):
     def __init__(self, *args, **kwargs) -> None:
 
         super().__init__(*args, **kwargs)
-        self._assign_types()
+        self._child_objects = []
+        self._assign_childs()
 
-    def _assign_types(self) -> None:
+    def _assign_childs(self) -> None:
 
         for key, value in self.items():
 
             if isinstance(value, list):
-                self.__setitem__(key, JsonList(value))
+                child = JsonList(value)
+                self.__setitem__(key, child)
             elif isinstance(value, dict):
-                self.__setitem__(key, JsonDict(value))
+                child = JsonDict(value)
+                self.__setitem__(key, child)
             elif isinstance(value, str):
-                self.__setitem__(key, JsonStr(value))
+                child = JsonStr(value)
+                self.__setitem__(key, child)
             elif isinstance(value, float):
-                self.__setitem__(key, JsonFloat(value))
+                child = JsonFloat(value)
+                self.__setitem__(key, child)
             elif isinstance(value, int):
-                self.__setitem__(key, JsonInt(value))
-            elif isinstance(value, bool):
-                self.__setitem__(key, JsonBool(value))
+                child = JsonInt(value)
+                self.__setitem__(key, child)
             else:
-                raise TypeError(f"wrong data's format: {type(value)}")
+                raise TypeError(f"Wrong data's format: {type(value)}")
+
+            self._child_objects.append(child)
+
+    def _send_query(self):
+
+        childs = self._child_objects
+        if len(childs) < 1:
+            print(self)
+        for child in childs:
+            child._send_query()
 
 
 class JsonMaster:
@@ -83,7 +143,5 @@ class JsonMaster:
             return JsonFloat(data)
         elif isinstance(data, int):
             return JsonInt(data)
-        elif isinstance(data, bool):
-            return JsonBool(data)
         else:
-            raise TypeError(f"wrong data's format: {type(data)}")
+            raise TypeError(f"Wrong data's format: {type(data)}")
