@@ -11,6 +11,10 @@ class JsonInt(int):
     pass
 
 
+class JsonBool(bool):
+    pass
+
+
 # ---- COMPOUND OBJECTS ----
 
 
@@ -34,6 +38,8 @@ class JsonList(list):
                 self.__setitem__(i, JsonFloat(item))
             elif isinstance(item, int):
                 self.__setitem__(i, JsonInt(item))
+            elif isinstance(item, bool):
+                self.__setitem__(i, JsonBool(item))
             else:
                 raise TypeError(f"wrong data's format: {type(item)}")
 
@@ -58,6 +64,8 @@ class JsonDict(dict):
                 self.__setitem__(key, JsonFloat(value))
             elif isinstance(value, int):
                 self.__setitem__(key, JsonInt(value))
+            elif isinstance(value, bool):
+                self.__setitem__(key, JsonBool(value))
             else:
                 raise TypeError(f"wrong data's format: {type(value)}")
 
@@ -75,5 +83,7 @@ class JsonMaster:
             return JsonFloat(data)
         elif isinstance(data, int):
             return JsonInt(data)
+        elif isinstance(data, bool):
+            return JsonBool(data)
         else:
             raise TypeError(f"wrong data's format: {type(data)}")
