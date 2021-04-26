@@ -53,13 +53,13 @@ class JsonInt(int, JsonMaster):
 
 
 class JsonList(list, JsonMaster):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
         self._child_objects = []
         self._assign_childs()
 
-    def _assign_childs(self) -> None:
+    def _assign_childs(self):
 
         for i, item in enumerate(self):
 
@@ -85,13 +85,13 @@ class JsonList(list, JsonMaster):
 
 
 class JsonDict(dict, JsonMaster):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
         self._child_objects = []
         self._assign_childs()
 
-    def _assign_childs(self) -> None:
+    def _assign_childs(self):
 
         for key, value in self.items():
 
