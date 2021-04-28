@@ -1,6 +1,27 @@
 # This module contains the base objects needed
 
 
+class JSONObject:
+    """
+    This class acts as a switcher.
+    """
+
+    def __new__(cls, data):
+
+        if isinstance(data, dict):
+            return JSONDict(data)
+        elif isinstance(data, list):
+            return JSONList(data)
+        elif isinstance(data, str):
+            return JSONStr(data)
+        elif isinstance(data, float):
+            return JSONFloat(data)
+        elif isinstance(data, int):
+            return JSONInt(data)
+        else:
+            raise TypeError(f"Wrong data's format: {type(data)}")
+
+
 class JSONMaster:
     """
     This is the base class for all JSON objects
@@ -61,6 +82,14 @@ class JSONCompose(JSONMaster):
 
                 self.__setitem__(i, child)
                 self._child_objects.append(child)
+
+    def query(self, **q):
+
+        childs = self._child_objects
+        if len(childs) < 1:
+            print(self)
+        for child in childs:
+            child.query(**q)
 
 
 class JSONSingleton(JSONMaster):
