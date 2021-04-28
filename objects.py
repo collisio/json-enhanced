@@ -15,13 +15,13 @@ class JsonMaster:
         else:
             raise TypeError(f"Wrong data's format: {type(data)}")
 
-    def _send_query(self):
+    def _send_query(self, **q):
 
         childs = self._child_objects
         if len(childs) < 1:
             print(self)
         for child in childs:
-            child._send_query()
+            child._send_query(**q)
 
 
 # ---- SINGLE OBJECTS ----
@@ -79,6 +79,10 @@ class JsonList(list, JsonMaster):
             self.__setitem__(i, child)
             self._child_objects.append(child)
 
+    def query(self, **q):
+
+        return self._send_query(**q)
+
 
 class JsonDict(dict, JsonMaster):
     def __init__(self, *args, **kwargs):
@@ -106,3 +110,7 @@ class JsonDict(dict, JsonMaster):
 
             self.__setitem__(key, child)
             self._child_objects.append(child)
+
+    def query(self, **q):
+
+        return self._send_query(**q)
