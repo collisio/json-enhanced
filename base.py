@@ -52,6 +52,7 @@ class JSONCompose(JSONMaster):
         By initializing instance, it assign types to child items
         """
         super().__init__(*args, **kwargs)
+        self.is_composed = True
         self._assign_childs()
 
     def _assign_childs(self):
@@ -73,10 +74,11 @@ class JSONCompose(JSONMaster):
     def query(self, **q):
 
         childs = self._child_objects
-        if len(childs) < 1:
-            print(self)
         for child in childs:
-            child.query(**q)
+            if child.is_composed:
+                child.query(**q)
+            else:
+                print(child)
 
 
 class JSONSingleton(JSONMaster):
@@ -87,6 +89,7 @@ class JSONSingleton(JSONMaster):
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
+        self.is_composed = False
 
 
 class JSONDict(dict, JSONCompose):
