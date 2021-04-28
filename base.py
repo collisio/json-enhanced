@@ -24,12 +24,20 @@ class JSONObject:
 
 class JSONMaster:
     """
-    This is the base class for all JSON objects
+    This is the base class for all JSON objects.
+
+    Attributes:
+    -----------
+        _child_objects:
+        key: last dict parent key where the object comes from
+        index: las list parent index where the object comes from
     """
 
     def __init__(self, *args, **kwargs):
 
         self._child_objects = []
+        self.key = None
+        self.index = None
 
 
 class JSONCompose(JSONMaster):
@@ -40,7 +48,9 @@ class JSONCompose(JSONMaster):
     """
 
     def __init__(self, *args, **kwargs):
-
+        """
+        By initializing instance, it assign types to child items
+        """
         super().__init__(*args, **kwargs)
         self._assign_childs()
 
@@ -49,13 +59,15 @@ class JSONCompose(JSONMaster):
         if isinstance(self, JSONDict):
             for key, value in self.items():
                 child = JSONObject(value)
+                child.key = key
                 self.__setitem__(key, child)
                 self._child_objects.append(child)
 
         elif isinstance(self, JSONList):
-            for i, item in enumerate(self):
+            for index, item in enumerate(self):
                 child = JSONObject(item)
-                self.__setitem__(i, child)
+                child.index = index
+                self.__setitem__(index, child)
                 self._child_objects.append(child)
 
     def query(self, **q):
