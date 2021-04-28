@@ -47,12 +47,13 @@ class JSONCompose(JSONMaster):
     Composed objects can send queries to childs.
     """
 
+    is_composed = True
+
     def __init__(self, *args, **kwargs):
         """
         By initializing instance, it assign types to child items
         """
         super().__init__(*args, **kwargs)
-        self.is_composed = True
         self._assign_childs()
 
     def _assign_childs(self):
@@ -86,11 +87,11 @@ class JSONSingleton(JSONMaster):
     This is the base class for JSON singleton objects
     """
 
+    is_composed = False
+
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
-        self.is_composed = False
-
 
 class JSONDict(dict, JSONCompose):
     """"""
