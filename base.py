@@ -48,38 +48,13 @@ class JSONCompose(JSONMaster):
 
         if isinstance(self, JSONDict):
             for key, value in self.items():
-                if isinstance(value, list):
-                    child = JSONList(value)
-                elif isinstance(value, dict):
-                    child = JSONDict(value)
-                elif isinstance(value, str):
-                    child = JSONStr(value)
-                elif isinstance(value, float):
-                    child = JSONFloat(value)
-                elif isinstance(value, int):
-                    child = JSONInt(value)
-                else:
-                    raise TypeError(f"Wrong data's format: {type(value)}")
-
+                child = JSONObject(value)
                 self.__setitem__(key, child)
                 self._child_objects.append(child)
 
         elif isinstance(self, JSONList):
             for i, item in enumerate(self):
-
-                if isinstance(item, list):
-                    child = JSONList(item)
-                elif isinstance(item, dict):
-                    child = JSONDict(item)
-                elif isinstance(item, str):
-                    child = JSONStr(item)
-                elif isinstance(item, float):
-                    child = JSONFloat(item)
-                elif isinstance(item, int):
-                    child = JSONInt(item)
-                else:
-                    raise TypeError(f"Wrong data's format: {type(item)}")
-
+                child = JSONObject(item)
                 self.__setitem__(i, child)
                 self._child_objects.append(child)
 
