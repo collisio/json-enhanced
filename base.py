@@ -75,10 +75,10 @@ class JSONCompose(JSONMaster):
 
         childs = self._child_objects
         for child in childs:
+            # do some stuff
+            print(f"Objeto: {child}\t Key: {child.key}\t Idx: {child.index}")
             if child.is_composed:
                 child.query(**q)
-            else:
-                print(child)
 
 
 class JSONSingleton(JSONMaster):
