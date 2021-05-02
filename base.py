@@ -1,4 +1,7 @@
 # This module contains the base objects needed
+from queryutils import parse_query, QuerySet
+
+
 class JSONObject:
     """
     This class acts as a switcher. It will return the corresponding class instance for a given data.
@@ -46,7 +49,7 @@ class JSONCompose(JSONMaster):
     """
     This is the base class for JSON composed objects.
     Composed objects can be dict or list instances.
-    Composed objects can send queries to childs.
+    Composed objects can send queries to childs (which can be also compose or singleton objects)
     """
 
     is_composed = True
@@ -78,8 +81,9 @@ class JSONCompose(JSONMaster):
 
         childs = self._child_objects
         for child in childs:
-            # do some stuff
+            # TODO parse query and take it as conditional
             print(f"Objeto: {child}\t Key: {child.key}\t Idx: {child.index}")
+            # if child is also a compose object, it will send the same query to its childs recursively
             if child.is_composed:
                 child.query(**q)
 
@@ -144,6 +148,7 @@ class JSONBool(JSONSingleton):
 
     def __bool__(self):
         return self._data
+
 
 class JSONNone(JSONSingleton):
     def __init__(self, data):
