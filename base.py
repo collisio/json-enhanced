@@ -77,15 +77,17 @@ class JSONCompose(JSONMaster):
                 self.__setitem__(index, child)
                 self._child_objects.append(child)
 
-    def query(self, **q):
+    def query(self, queryset=QuerySet(), **q):
 
         childs = self._child_objects
         for child in childs:
             # TODO parse query and take it as conditional
+            queryset.append(child)
             print(f"Objeto: {child}\t Key: {child.key}\t Idx: {child.index}")
             # if child is also a compose object, it will send the same query to its childs recursively
             if child.is_composed:
-                child.query(**q)
+                child.query(queryset=queryset, **q)
+        return queryset
 
 
 class JSONSingleton(JSONMaster):
