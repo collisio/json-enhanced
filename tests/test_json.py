@@ -9,6 +9,7 @@ from base import (
     JSONInt,
     JSONList,
     JSONMaster,
+    JSONNone,
     JSONObject,
     JSONSingleton,
     JSONStr,
@@ -28,6 +29,9 @@ class JsonTest(unittest.TestCase):
         self.test3 = JSONObject(
             {"List": [True, False], "Bool": True, "Dict": {"Float": 3.2}}
         )
+        self.test4 = JSONObject(
+            {"List": [0, 0.1, "str", None], "Dict": {"Bool": True, "None": None}}
+        )
 
     def test_types(self):
         """Assert all child types are the correct ones"""
@@ -37,7 +41,6 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test1[0]["Float"], JSONFloat)
         self.assertIsInstance(self.test1[0]["Int"], JSONInt)
         self.assertIsInstance(self.test1[0]["Str"], JSONStr)
-
         self.assertIsInstance(self.test1[1], JSONDict)
         self.assertIsInstance(self.test1[1]["Dict"], JSONDict)
         self.assertIsInstance(self.test1[1]["Dict"]["Float"], JSONFloat)
@@ -51,6 +54,16 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test3["Dict"], JSONDict)
         self.assertIsInstance(self.test3["Dict"]["Float"], JSONFloat)
 
+        self.assertIsInstance(self.test4, JSONDict)
+        self.assertIsInstance(self.test4["List"], JSONList)
+        self.assertIsInstance(self.test4["List"][0], JSONInt)
+        self.assertIsInstance(self.test4["List"][1], JSONFloat)
+        self.assertIsInstance(self.test4["List"][2], JSONStr)
+        self.assertIsInstance(self.test4["List"][3], JSONNone)
+        self.assertIsInstance(self.test4["Dict"], JSONDict)
+        self.assertIsInstance(self.test4["Dict"]["Bool"], JSONBool)
+        self.assertIsInstance(self.test4["Dict"]["None"], JSONNone)
+
     def test_json_serializable(self):
 
         self.assertEqual(
@@ -63,4 +76,9 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             json.dumps(self.test3, cls=JSONObjectEncoder).replace('"', "'"),
             self.test3.__repr__().replace("True", "true").replace("False", "false"),
+        )
+
+        self.assertEqual(
+            json.dumps(self.test4, cls=JSONObjectEncoder),
+            '{"List": [0, 0.1, "str", null], "Dict": {"Bool": true, "None": null}}',
         )

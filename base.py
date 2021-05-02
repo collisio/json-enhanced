@@ -12,6 +12,8 @@ class JSONObject:
             return JSONList(data)
         elif isinstance(data, bool):
             return JSONBool(data)
+        elif isinstance(data, type(None)):
+            return JSONNone(data)
         elif isinstance(data, str):
             return JSONStr(data)
         elif isinstance(data, float):
@@ -142,3 +144,20 @@ class JSONBool(JSONSingleton):
 
     def __bool__(self):
         return self._data
+
+class JSONNone(JSONSingleton):
+    def __init__(self, data):
+
+        if not isinstance(data, type(None)):
+            raise TypeError(f"Argument is not a valid None type: {type(data)}")
+        super().__init__()
+        self._data = data
+
+    def __str__(self):
+        return str()
+
+    def __repr__(self):
+        return str()
+
+    def __bool__(self):
+        return False
