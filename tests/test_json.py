@@ -25,6 +25,9 @@ class JsonTest(unittest.TestCase):
             ]
         )
         self.test2 = JSONObject(True)
+        self.test3 = JSONObject(
+            {"List": [True, False], "Bool": True, "Dict": {"Float": 3.2}}
+        )
 
     def test_types(self):
         """Assert all child types are the correct ones"""
@@ -40,6 +43,14 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test1[1]["Dict"]["Float"], JSONFloat)
         self.assertIsInstance(self.test1[1]["Dict"]["List"], JSONList)
 
+        self.assertIsInstance(self.test3, JSONDict)
+        self.assertIsInstance(self.test3["List"], JSONList)
+        self.assertIsInstance(self.test3["List"][0], JSONBool)
+        self.assertIsInstance(self.test3["List"][1], JSONBool)
+        self.assertIsInstance(self.test3["Bool"], JSONBool)
+        self.assertIsInstance(self.test3["Dict"], JSONDict)
+        self.assertIsInstance(self.test3["Dict"]["Float"], JSONFloat)
+
     def test_json_serializable(self):
 
         self.assertEqual(
@@ -48,4 +59,8 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             json.dumps(self.test2, cls=JSONObjectEncoder).replace('"', "'"),
             self.test2.__repr__().lower(),
+        )
+        self.assertEqual(
+            json.dumps(self.test3, cls=JSONObjectEncoder).replace('"', "'"),
+            self.test3.__repr__().replace("True", "true").replace("False", "false"),
         )

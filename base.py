@@ -94,6 +94,7 @@ class JSONSingleton(JSONMaster):
         super().__init__(*args, **kwargs)
 
 
+# ---- COMPOSE OBJECTS ----
 class JSONDict(dict, JSONCompose):
     """"""
 
@@ -112,6 +113,7 @@ class JSONList(list, JSONCompose):
         JSONCompose.__init__(self, *args, **kwargs)
 
 
+# ---- SINGLETON OBJECTS ----
 class JSONStr(str, JSONSingleton):
     pass
 
