@@ -1,9 +1,7 @@
 # This module contains the base objects needed
-
-
 class JSONObject:
     """
-    This class acts as a switcher.
+    This class acts as a switcher. It will return the corresponding class instance for a given data.
     """
 
     def __new__(cls, data):
@@ -12,6 +10,8 @@ class JSONObject:
             return JSONDict(data)
         elif isinstance(data, list):
             return JSONList(data)
+        elif isinstance(data, bool):
+            return JSONBool(data)
         elif isinstance(data, str):
             return JSONStr(data)
         elif isinstance(data, float):
@@ -93,6 +93,7 @@ class JSONSingleton(JSONMaster):
 
         super().__init__(*args, **kwargs)
 
+
 class JSONDict(dict, JSONCompose):
     """"""
 
@@ -121,3 +122,21 @@ class JSONFloat(float, JSONSingleton):
 
 class JSONInt(int, JSONSingleton):
     pass
+
+
+class JSONBool(JSONSingleton):
+    def __init__(self, data):
+
+        if not isinstance(data, bool):
+            raise TypeError(f"Argument is not a valid boolean type: {type(data)}")
+        super().__init__()
+        self._data = data
+
+    def __str__(self):
+        return str(self._data)
+
+    def __repr__(self):
+        return str(self._data)
+
+    def __bool__(self):
+        return self._data

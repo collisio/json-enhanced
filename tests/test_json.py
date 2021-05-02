@@ -1,6 +1,8 @@
-import unittest
 import json
+import unittest
+
 from base import (
+    JSONBool,
     JSONCompose,
     JSONDict,
     JSONFloat,
@@ -11,6 +13,7 @@ from base import (
     JSONSingleton,
     JSONStr,
 )
+from encoders import JSONObjectEncoder
 
 
 class JsonTest(unittest.TestCase):
@@ -21,6 +24,7 @@ class JsonTest(unittest.TestCase):
                 {"Dict": {"Float": 0.0, "List": [1, 2, 3]}},
             ]
         )
+        self.test2 = JSONObject(True)
 
     def test_types(self):
         """Assert all child types are the correct ones"""
@@ -40,4 +44,8 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(
             json.dumps(self.test1).replace('"', "'"), self.test1.__repr__()
+        )
+        self.assertEqual(
+            json.dumps(self.test2, cls=JSONObjectEncoder).replace('"', "'"),
+            self.test2.__repr__().lower(),
         )
