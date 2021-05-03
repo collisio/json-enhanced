@@ -1,5 +1,5 @@
 from json import JSONEncoder
-from base import JSONBool, JSONNone
+
 
 
 class JSONObjectEncoder(JSONEncoder):
@@ -9,6 +9,7 @@ class JSONObjectEncoder(JSONEncoder):
     """
     
     def default(self, o):
+        from base import JSONBool, JSONNone
         if isinstance(o, (JSONBool, JSONNone)):
             return o._data
         return super().default(o)

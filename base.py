@@ -1,5 +1,7 @@
 # This module contains the base objects needed
+from encoders import JSONObjectEncoder
 from queryutils import parse_query, QuerySet
+import json
 
 
 class JSONObject:
@@ -44,6 +46,13 @@ class JSONMaster:
         self.key = None
         self.index = None
 
+    def json_encode(self, **kwargs):
+        return json.dumps(self, cls=JSONObjectEncoder, **kwargs)
+
+    @property
+    def json_data(self):
+        return json.loads(json.dumps(self, cls=JSONObjectEncoder))
+
 
 class JSONCompose(JSONMaster):
     """
@@ -79,7 +88,7 @@ class JSONCompose(JSONMaster):
                 self._child_objects.append(child)
 
     def query(self, recursive_=True, **q):
-        queryset=QuerySet()
+        queryset = QuerySet()
         childs = self._child_objects
         for child in childs:
             # if child satisfies query request, it will be appended to the queryset object
