@@ -1,5 +1,9 @@
 # This module contains utilities to parse query arguments and transforms it to a conditional expression
-from exceptions import JSONQueryException
+import re
+
+from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
+from exceptions import JSONQueryException, JSONSingletonException
+
 
 def parse_query(child, **q):
     """
@@ -32,7 +36,17 @@ def parse_query(child, **q):
             if child != target_value:
                 return False
 
-    return True # if match has not failed, current child will be appended to queryset
+    return True  # if match has not failed, current child will be appended to queryset
+
+
+def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
+    if decimal_sep == thousands_sep:
+        raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
+    if isinstance(s, str):
+        pipe = re.sub(r"[^0-9\s,.+-]", "", s)
+        pipe = re.sub(r"(?<=[+-])\s+", "", pipe)
+        pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
+    return float(pipe)
 
 
 class QuerySet(list):

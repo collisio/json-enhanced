@@ -1,6 +1,6 @@
 # This module contains the base objects needed
 from encoders import JSONObjectEncoder
-from queryutils import parse_query, QuerySet
+from queryutils import parse_query, QuerySet, parse_float
 import json
 
 
@@ -133,7 +133,8 @@ class JSONList(list, JSONCompose):
 
 # ---- SINGLETON OBJECTS ----
 class JSONStr(str, JSONSingleton):
-    pass
+    def to_float(self):
+        return parse_float(self)
 
 
 class JSONFloat(float, JSONSingleton):
