@@ -44,7 +44,7 @@ class JsonTest(unittest.TestCase):
                     },
                 },
                 {
-                    "List": [{"Dict": {"Float": 1.2}, "Bool": True}],
+                    "List": [{"Dict": {"Float": "1.2"}, "Bool": True}],
                     "Dict": {"List": [None, {"Str": "string2"}]},
                 },
             ]
@@ -103,9 +103,8 @@ class JsonTest(unittest.TestCase):
 
     def test_queries(self):
 
+        self.assertEqual(self.test5.query(Float=1.2), QuerySet([JSONStr(1.2)]))
         self.assertEqual(
-            self.test5.query(Float=1.2), QuerySet([JSONFloat(1.2)])
+            self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONStr(1.2)])
         )
-        self.assertEqual(
-            self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONFloat(1.2)])
-        )
+        self.assertEqual(self.test5.query(Str__exact="string2"), QuerySet(["string2"]))

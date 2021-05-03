@@ -15,7 +15,7 @@ def parse_query(child, **q):
         splitted = k.split("__")
         target_key = splitted[0]
         if not target_key:
-            raise JSONQueryException("Bad query")
+            raise JSONQueryException("Bad query. Missing target key")
         # first of all, if target key of query argument does not match child's key, we won't append it to querylist
         if target_key != child.key:
             return False
@@ -33,9 +33,16 @@ def parse_query(child, **q):
         # ---- MATCH ----
         if target_action == "exact":
             # child value must match with target value of query
-            # TODO
+            # TODO complete match
             if child != target_value:
                 return False
+        elif target_action == "gt":
+            if child > target_value:
+                pass
+            else:
+                return False
+        else:
+            raise JSONQueryException(f"Bad query: {target_action}")
 
     return True  # if match has not failed, current child will be appended to queryset
 
