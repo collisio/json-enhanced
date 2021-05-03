@@ -1,5 +1,5 @@
 # This module contains utilities to parse query arguments and transforms it to a conditional expression
-
+from exceptions import JSONQueryException
 
 def parse_query(child, **q):
     """
@@ -10,6 +10,8 @@ def parse_query(child, **q):
     for k, v in q.items():
         splitted = k.split("__")
         target_key = splitted[0]
+        if not target_key:
+            raise JSONQueryException("Bad query")
         # first of all, if target key of query argument does not match child's key, we won't append it to querylist
         if target_key != child.key:
             return False
@@ -23,7 +25,13 @@ def parse_query(child, **q):
             except IndexError:
                 target_action_extra = None
         target_value = v
-    return True
+        # ---- MATCH ----
+        if target_action == "exact":
+            # child value must match with target value of query
+            # TODO
+            pass
+
+    return True # if match has not failed, current child will be appended to queryset
 
 
 class QuerySet(list):
