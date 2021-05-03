@@ -29,7 +29,8 @@ def parse_query(child, **q):
         if target_action == "exact":
             # child value must match with target value of query
             # TODO
-            pass
+            if child != target_value:
+                return False
 
     return True # if match has not failed, current child will be appended to queryset
 

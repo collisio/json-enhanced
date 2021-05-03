@@ -104,5 +104,8 @@ class JsonTest(unittest.TestCase):
     def test_queries(self):
 
         self.assertEqual(
+            self.test5.query(Float=1.2), QuerySet([JSONFloat(1.2)])
+        )
+        self.assertEqual(
             self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONFloat(1.2)])
         )
