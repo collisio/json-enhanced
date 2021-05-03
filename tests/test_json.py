@@ -15,6 +15,7 @@ from base import (
     JSONStr,
 )
 from encoders import JSONObjectEncoder
+from queryutils import QuerySet
 
 
 class JsonTest(unittest.TestCase):
@@ -31,6 +32,22 @@ class JsonTest(unittest.TestCase):
         )
         self.test4 = JSONObject(
             {"List": [0, 0.1, "str", None], "Dict": {"Bool": True, "None": None}}
+        )
+
+        self.test5 = JSONObject(
+            [
+                {
+                    "Float": 1.1,
+                    "Dict": {
+                        "List": [{"Str": "string1", "List": [None, True, False, 1]}],
+                        "Null": None,
+                    },
+                },
+                {
+                    "List": [{"Dict": {"Float": 1.2}, "Bool": True}],
+                    "Dict": {"List": [None, {"Str": "string2"}]},
+                },
+            ]
         )
 
     def test_types(self):
@@ -81,4 +98,10 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             json.dumps(self.test4, cls=JSONObjectEncoder),
             '{"List": [0, 0.1, "str", null], "Dict": {"Bool": true, "None": null}}',
+        )
+
+    def test_queries(self):
+
+        self.assertEqual(
+            self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONFloat(1.2)])
         )
