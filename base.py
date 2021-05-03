@@ -78,7 +78,7 @@ class JSONCompose(JSONMaster):
                 self.__setitem__(index, child)
                 self._child_objects.append(child)
 
-    def query(self, **q):
+    def query(self, recursive_=True, **q):
         queryset=QuerySet()
         childs = self._child_objects
         for child in childs:
@@ -86,7 +86,7 @@ class JSONCompose(JSONMaster):
             if parse_query(child, **q):
                 queryset.append(child)
             # if child is also a compose object, it will send the same query to its childs recursively
-            if child.is_composed:
+            if child.is_composed and recursive_:
                 queryset += child.query(**q)
         return queryset
 
