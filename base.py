@@ -62,6 +62,7 @@ class JSONCompose(JSONMaster):
         self._assign_childs()
 
     def _assign_childs(self):
+        """Any JSON object can be a child for a given compose object"""
 
         if isinstance(self, JSONDict):
             for key, value in self.items():
@@ -81,9 +82,9 @@ class JSONCompose(JSONMaster):
 
         childs = self._child_objects
         for child in childs:
-            # TODO parse query and take it as conditional
-            queryset.append(child)
-            print(f"Objeto: {child}\t Key: {child.key}\t Idx: {child.index}")
+            # if child satisfies query request, it will be appended to the queryset object
+            if parse_query(child, **q):
+                queryset.append(child)
             # if child is also a compose object, it will send the same query to its childs recursively
             if child.is_composed:
                 child.query(queryset=queryset, **q)
@@ -164,6 +165,7 @@ class JSONNone(JSONSingleton):
         return str()
 
     def __repr__(self):
+        # TODO change repr to None
         return str()
 
     def __bool__(self):
