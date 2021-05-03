@@ -29,6 +29,7 @@ def parse_query(child, **q):
             except IndexError:
                 target_action_extra = None
         target_value = v
+
         # ---- MATCH ----
         if target_action == "exact":
             # child value must match with target value of query
@@ -46,6 +47,8 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
         pipe = re.sub(r"[^0-9\s,.+-]", "", s)
         pipe = re.sub(r"(?<=[+-])\s+", "", pipe)
         pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
+    else:
+        return float(s)
     return float(pipe)
 
 

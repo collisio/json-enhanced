@@ -31,7 +31,7 @@ class JSONObject:
 
 class JSONMaster:
     """
-    This is the base class for all JSON objects.
+    This is the base class for all JSON objects (compose or singleton).
 
     Attributes:
     -----------
