@@ -82,6 +82,7 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test4["Dict"]["None"], JSONNone)
 
     def test_json_serializable(self):
+        """Assert that the JSONObject is serializable"""
 
         self.assertEqual(
             json.dumps(self.test1).replace('"', "'"), self.test1.__repr__()
