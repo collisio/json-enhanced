@@ -136,6 +136,7 @@ class JSONStr(str, JSONSingleton):
     def to_float(self):
         return parse_float(self)
 
+    # comparison magic methods
     def __eq__(self, other):
         if isinstance(other, float):
             return self.to_float() == other
@@ -159,7 +160,9 @@ class JSONBool(JSONSingleton):
     def __init__(self, data):
 
         if not isinstance(data, bool):
-            raise TypeError(f"Argument is not a valid boolean type: {type(data)}")
+            raise TypeError(
+                f"Argument is not a valid boolean type: {type(data)}"
+            )
         super().__init__()
         self._data = data
 

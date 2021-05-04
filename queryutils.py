@@ -23,11 +23,11 @@ def parse_query(child, **q):
             target_action = splitted[1]
         except IndexError:  # default action will be exact value match
             target_action = "exact"
-        else:
-            try:
-                target_action_extra = splitted[2]
-            except IndexError:
-                target_action_extra = None
+        # else:
+        #     try:
+        #         target_action_extra = splitted[2]
+        #     except IndexError:
+        #         target_action_extra = None
         target_value = v
 
         # ---- MATCH ----
@@ -43,15 +43,24 @@ def parse_query(child, **q):
                 pass
             else:
                 return False
+        elif target_action == "lt":
+            if child < target_value:
+                pass
+            else:
+                return False
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 
     return True  # if match has not failed, current child will be appended to queryset
 
 
-def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
+def parse_float(
+    s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR
+):
     if decimal_sep == thousands_sep:
-        raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
+        raise JSONSingletonException(
+            "Decimal and Thousands separators cannot be equal"
+        )
     if isinstance(s, str):
         pipe = re.sub(r"[^0-9\s,.+-]", "", s)
         pipe = re.sub(r"(?<=[+-])\s+", "", pipe)

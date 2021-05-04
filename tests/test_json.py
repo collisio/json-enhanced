@@ -31,7 +31,10 @@ class JsonTest(unittest.TestCase):
             {"List": [True, False], "Bool": True, "Dict": {"Float": 3.2}}
         )
         self.test4 = JSONObject(
-            {"List": [0, 0.1, "str", None], "Dict": {"Bool": True, "None": None}}
+            {
+                "List": [0, 0.1, "str", None],
+                "Dict": {"Bool": True, "None": None},
+            }
         )
 
         self.test5 = JSONObject(
@@ -39,7 +42,9 @@ class JsonTest(unittest.TestCase):
                 {
                     "Float": 1.1,
                     "Dict": {
-                        "List": [{"Str": "string1", "List": [None, True, False, 1]}],
+                        "List": [
+                            {"Str": "string1", "List": [None, True, False, 1]}
+                        ],
                         "Null": None,
                     },
                 },
@@ -93,7 +98,9 @@ class JsonTest(unittest.TestCase):
         )
         self.assertEqual(
             json.dumps(self.test3, cls=JSONObjectEncoder).replace('"', "'"),
-            self.test3.__repr__().replace("True", "true").replace("False", "false"),
+            self.test3.__repr__()
+            .replace("True", "true")
+            .replace("False", "false"),
         )
 
         self.assertEqual(
@@ -105,7 +112,10 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(self.test5.query(Float=1.2), QuerySet([JSONStr(1.2)]))
         self.assertEqual(
-            self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONStr(1.2)])
+            self.test5.query(Float__gt=1),
+            QuerySet([JSONFloat(1.1), JSONStr(1.2)]),
         )
         self.assertEqual(self.test5.query(Float__gt=2), QuerySet())
-        self.assertEqual(self.test5.query(Str__exact="string2"), QuerySet(["string2"]))
+        self.assertEqual(
+            self.test5.query(Str__exact="string2"), QuerySet(["string2"])
+        )
