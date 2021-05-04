@@ -107,4 +107,5 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONStr(1.2)])
         )
+        self.assertEqual(self.test5.query(Float__gt=2), QuerySet())
         self.assertEqual(self.test5.query(Str__exact="string2"), QuerySet(["string2"]))

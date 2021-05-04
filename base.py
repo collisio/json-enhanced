@@ -136,11 +136,11 @@ class JSONStr(str, JSONSingleton):
     def to_float(self):
         return parse_float(self)
 
-    def __ne__(self, other):
+    def __eq__(self, other):
         if isinstance(other, float):
-            return self.to_float() != other
+            return self.to_float() == other
         else:
-            return super().__ne__(other)
+            return super().__eq__(other)
 
     def __gt__(self, other):
         if isinstance(other, (int, float)):

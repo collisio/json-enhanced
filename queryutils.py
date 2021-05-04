@@ -34,7 +34,9 @@ def parse_query(child, **q):
         if target_action == "exact":
             # child value must match with target value of query
             # TODO complete match
-            if child != target_value:
+            if child == target_value:
+                pass
+            else:
                 return False
         elif target_action == "gt":
             if child > target_value:
