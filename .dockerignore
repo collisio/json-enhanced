@@ -1,0 +1,9 @@
+.*
+LICENSE
+README.md
+MANIFEST.in
+venv
+setup.cfg
+setup.py
+build.sh
+Dockerfile

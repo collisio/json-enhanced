@@ -6,6 +6,8 @@
 # Virtual env
 venv/
 
+*egg-info
+
 # User-specific files
 *.rsuser
 *.suo
@@ -13,11 +15,8 @@ venv/
 *.userosscache
 *.sln.docstates
 
-# User-specific files (MonoDevelop/Xamarin Studio)
-*.userprefs
-
-# Mono auto generated files
-mono_crash.*
+# pypi token
+.pypirc
 
 # Build results
 [Dd]ebug/

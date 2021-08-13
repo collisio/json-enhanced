@@ -1,0 +1,65 @@
+{
+    "data": {
+        "id": "0008523621",
+        "amount": 55856212.25,
+        "success": false,
+        "team": [
+            {
+                "name": "David G. García",
+                "age": 36,
+                "hobbies": [
+                    "music",
+                    "reading"
+                ]
+            },
+            {
+                "name": "Alexander D. Diego",
+                "age": 31,
+                "hobbies": [
+                    "cooking",
+                    "music",
+                    "sports",
+                    "yoga"
+                ]
+            },
+            {
+                "name": "David A. Márquez",
+                "age": 28,
+                "hobbies": null
+            },
+            {
+                "name": "Peter C. Jackson",
+                "age": 31,
+                "hobbies": [
+                    "sports",
+                    "reading",
+                    "tennis",
+                    "smoke"
+                ],
+                "staff": true
+            }
+        ]
+    },
+    "updated_at": "2021-05-01T09:30:00",
+    "comments": {
+        "data": "structured",
+        "amount": 2,
+        "comments": [
+            0,
+            {
+                "name": "Peter K. Márquez",
+                "text": "Great!",
+                "valuation": 10,
+                "timestamp": "2020-03-01"
+            },
+            1,
+            {
+                "name": "Jacob H. Stack",
+                "text": "Bad!",
+                "valuation": 1,
+                "timestamp": "2021-03-05",
+                "staff": true
+            }
+        ]
+    }
+}

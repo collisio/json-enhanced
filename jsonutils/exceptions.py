@@ -5,5 +5,8 @@ class JSONQueryException(Exception):
 
 
 class JSONSingletonException(Exception):
+    pass
 
+
+class JSONDecodeException(Exception):
     pass

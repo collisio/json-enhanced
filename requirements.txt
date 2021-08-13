@@ -1,0 +1,7 @@
+ipython==7.26.0
+jedi==0.17.2
+pytz==2021.1
+regex==2021.4.4
+requests==2.26.0
+twine==3.4.2
+build==0.6.0.post1
