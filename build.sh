@@ -12,10 +12,10 @@ if [[ $# -eq 0 ]]
 then
     echo "==== Building without volume ===="
     echo
-    docker run --rm --name json-queries -it json-queries
+    docker run --rm --name json-queries -v /etc/localtime:/etc/localtime:ro -it json-queries
 else
     echo "==== Building with volume ===="
     echo "mounted at /mnt$1"
     echo
-    docker run --rm --name json-queries -v $1:/mnt/$1 -it json-queries
+    docker run --rm --name json-queries -v $1:/mnt/$1 -v /etc/localtime:/etc/localtime:ro -it json-queries
 fi

@@ -29,7 +29,7 @@ def retry_function(
             ):
                 if hasattr(out, "status_code"):
                     if out.status_code > 299:
-                        time.sleep(1)
+                        time.sleep(0.5)
                         continue
                     else:
                         return out if output_value == default else output_value
