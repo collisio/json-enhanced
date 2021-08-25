@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'json-enhanced'
-copyright = '2021, Daniel Diego Horcajuelo'
+copyright = '2021, Collisio Technologies'
 author = 'Daniel Diego Horcajuelo'
 
 
