@@ -550,6 +550,7 @@ class JsonTest(unittest.TestCase):
 
         test = JSONObject({"data": [{"A": 1, "B": 2}]})
         test2 = JSONObject({"key": "mykey", "index": 1, "nested": {"index": "2"}})
+        test3 = JSONObject([1, 2, {"A": [3, 4]}])
 
         self.assertEqual(
             test.query(data__0__contains="B"), QuerySet([[{"A": 1, "B": 2}]])
@@ -574,3 +575,13 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test2.query(key=All), [111])
         self.assertListEqual(test2.query(index=All), [333, 222])
         self.assertEqual(test2.query(index=333).first().jsonpath, "nested/index/")
+
+        self.assertTrue(test3.query(A__contains=4).exists())
+
+        test3._0 = "first"
+        test3._1 = "second"
+        test3._2.A._1 = "last"
+
+        self.assertListEqual(test3, JSONObject(["first", "second", {"A": [3, "last"]}]))
+        self.assertFalse(test3.query(A__contains=4).exists())
+        self.assertTrue(test3.query(A__contains="last").exists())

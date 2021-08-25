@@ -435,6 +435,15 @@ class JSONList(list, JSONCompose):
         except ValueError:
             raise AttributeError
 
+    def __setattr__(self, name, value):
+        """To define behaviour when setting an atributte. It must register a new node if not a reserved keyword"""
+
+        if name in ("_key", "_index", "parent", "_id", "_child_objects"):
+            return super().__setattr__(name, value)
+        else:
+            name = int(name.replace("_", ""))
+            return self.__setitem__(name, value)
+
     def __setitem__(self, index, item):
 
         # ---- initialize child ----
