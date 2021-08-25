@@ -69,7 +69,7 @@ class SingleQuery:
                 f"child argument must be JSONNode type, not {type(node)}"
             )
         # if child key does not match the target query key, returns False, because this is a single query
-        if node.key != self.target_key:
+        if node._key != self.target_key:
             return False
 
         # grab a list of node actions, without the action suffix

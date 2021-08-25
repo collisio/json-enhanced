@@ -139,16 +139,16 @@ class JSONNode:
     Attributes:
     -----------
         _child_objects:
-        key: last dict parent key where the object comes from
-        index: las list parent index where the object comes from
+        _key: last dict parent key where the object comes from
+        _index: las list parent index where the object comes from
         parent: last parent object where this object comes from
         _id: unique uuid4 hex identifier of object
     """
 
     def __init__(self, *args, **kwargs):
 
-        self.key = None
-        self.index = None
+        self._key = None
+        self._index = None
         self.parent = None
         self._id = uuid4().hex
 
@@ -169,7 +169,7 @@ class JSONNode:
         parent = self
         path = JSONPath()
         while parent is not None:
-            path._update(key=parent.key, index=parent.index)
+            path._update(key=parent._key, index=parent._index)
             parent = parent.parent
         return path
 
@@ -276,14 +276,14 @@ class JSONCompose(JSONNode):
         if isinstance(self, JSONDict):
             for key, value in self.items():
                 child = JSONObject(value)
-                child.key = key
+                child._key = key
                 child.parent = self
                 self.__setitem__(key, child)
 
         elif isinstance(self, JSONList):
             for index, item in enumerate(self):
                 child = JSONObject(item)
-                child.index = index
+                child._index = index
                 child.parent = self
                 self.__setitem__(index, child)
 
@@ -349,7 +349,7 @@ class JSONDict(dict, JSONCompose):
 
         # ---- initalize child ----
         child = JSONObject(v)
-        child.key = k
+        child._key = k
         child.parent = self
 
         # ---- remove old child ----
@@ -365,6 +365,14 @@ class JSONDict(dict, JSONCompose):
         self._child_objects[child._id] = child
 
         return super().__setitem__(k, child)
+
+    def __setattr__(self, name, value):
+        """To define behaviour when setting an atributte. It must register a new node if not a reserved keyword"""
+
+        if name in ("_key", "_index", "parent", "_id", "_child_objects"):
+            return super().__setattr__(name, value)
+        else:
+            return self.__setitem__(name, value)
 
     def copy(self):
         obj = type(self)(self)
@@ -399,7 +407,7 @@ class JSONList(list, JSONCompose):
     def append(self, item):
 
         child = JSONObject(item)
-        child.index = self.__len__()
+        child._index = self.__len__()
         child.parent = self
 
         self._child_objects[child._id] = child
@@ -431,7 +439,7 @@ class JSONList(list, JSONCompose):
 
         # ---- initialize child ----
         child = JSONObject(item)
-        child.index = index
+        child._index = index
         child.parent = self
 
         # ---- remove old child ----

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Installation &mdash; json-enhanced  documentation</title>
+  <title>Installation &amp; Quickstart &mdash; json-enhanced  documentation</title>
   
 
   
@@ -89,9 +89,10 @@
             
               <p class="caption" role="heading"><span class="caption-text">Table of contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation &amp; Quickstart</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pip-installation">Pip installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#docker-s-set-up">Docker’s set up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basic_types.html">Basic types</a></li>
@@ -143,7 +144,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Installation</li>
+      <li>Installation &amp; Quickstart</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -162,8 +163,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="installation-quickstart">
+<h1>Installation &amp; Quickstart<a class="headerlink" href="#installation-quickstart" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="pip-installation">
 <h2>Pip installation<a class="headerlink" href="#pip-installation" title="Permalink to this headline">¶</a></h2>
 <p>This package can be installed via pip, by simply typing:</p>
@@ -177,6 +178,53 @@ You can access an Ipython terminal by entering the following command:</p>
 <p><code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">build.sh</span></code></p>
 <p>Also, if you want to load a local resource from your host system into the container, you can point to it with an additional argument on the script’s call:</p>
 <p><code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">build.sh</span> <span class="pre">&lt;resource_path&gt;</span></code></p>
+</div>
+<div class="section" id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
+<p>To start, we import the module into our workspace:</p>
+<p><code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">jsonutils</span> <span class="pre">as</span> <span class="pre">js</span></code></p>
+<p>There are different ways to load a JSON object in our interpreter:</p>
+<ul class="simple">
+<li><p>By directly entering the corresponding Python object in the constructor</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">json_object</span> <span class="o">=</span> <span class="n">js</span><span class="o">.</span><span class="n">JSONObject</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Daniel&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;hobbies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;music&quot;</span><span class="p">,</span> <span class="s2">&quot;reading&quot;</span><span class="p">,</span> <span class="s2">&quot;football&quot;</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Gloria&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+                <span class="s2">&quot;hobbies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tennis&quot;</span><span class="p">,</span> <span class="s2">&quot;music&quot;</span><span class="p">,</span> <span class="s2">&quot;programming&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul>
+<li><p>By calling the method <code class="docutils literal notranslate"><span class="pre">open</span></code> of <code class="docutils literal notranslate"><span class="pre">JSONObject</span></code> class. This method detects whether the argument entered
+corresponds to a local path or a remote web page.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">json_object</span> <span class="o">=</span> <span class="n">js</span><span class="o">.</span><span class="n">JSONObject</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;&lt;path_of_json_file&gt;&quot;</span><span class="p">)</span> <span class="c1"># to open a local json file</span>
+
+<span class="n">json_object</span> <span class="o">=</span> <span class="n">js</span><span class="o">.</span><span class="n">JSONObject</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;&lt;url_of_json_file&gt;&quot;</span><span class="p">)</span> <span class="c1"># to open a remote url json file</span>
+</pre></div>
+</div>
+<p>if requesting a remote url, it must include http or https protocol in order to be validated.</p>
+</li>
+</ul>
+<p>Once the json data has been loaded as a <code class="docutils literal notranslate"><span class="pre">JSONNode</span></code> instance, we will be able to perform some useful things,
+such as browsing the nested object by attribute access with autocompletion features:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_0</span><span class="o">.</span><span class="n">hobbies</span><span class="o">.</span><span class="n">_1</span>
+    <span class="s1">&#39;reading&#39;</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_1</span><span class="o">.</span><span class="n">name</span>
+    <span class="s1">&#39;Gloria&#39;</span>
+</pre></div>
+</div>
 </div>
 </div>
 

@@ -1,5 +1,5 @@
-Installation
-============
+Installation & Quickstart
+=========================
 
 Pip installation
 ----------------
@@ -21,3 +21,54 @@ Also, if you want to load a local resource from your host system into the contai
 
 ``bash build.sh <resource_path>``
 
+Quickstart
+----------
+
+To start, we import the module into our workspace:
+
+``import jsonutils as js``
+
+There are different ways to load a JSON object in our interpreter:
+
+* By directly entering the corresponding Python object in the constructor
+
+.. code-block:: python
+
+    json_object = js.JSONObject(
+        {
+            "data": [
+                {
+                    "name": "Daniel",
+                    "age": 30,
+                    "hobbies": ["music", "reading", "football"]
+                },
+                {
+                    "name": "Gloria",
+                    "age": 25,
+                    "hobbies": ["tennis", "music", "programming"]
+                }
+            ]
+        }
+    )
+
+* By calling the method ``open`` of ``JSONObject`` class. This method detects whether the argument entered
+  corresponds to a local path or a remote web page.
+
+  .. code-block:: python
+
+    json_object = js.JSONObject.open("<path_of_json_file>") # to open a local json file
+
+    json_object = js.JSONObject.open("<url_of_json_file>") # to open a remote url json file
+
+  if requesting a remote url, it must include http or https protocol in order to be validated.
+
+Once the json data has been loaded as a ``JSONNode`` instance, we will be able to perform some useful things,
+such as browsing the nested object by attribute access with autocompletion features:
+
+.. code-block:: python
+
+    >> json_object.data._0.hobbies._1
+        'reading'
+
+    >> json_object.data._1.name
+        'Gloria'

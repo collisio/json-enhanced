@@ -48,7 +48,7 @@ def _parse_query(child, include_parent_, **q):
         if not target_key:
             raise JSONQueryException("Bad query. Missing target key")
         # first of all, if target key of query argument does not match child's key, we won't append it to querylist
-        if target_key != child.key:
+        if target_key != child._key:
             return False, None
         try:
             target_action = splitted[1]
