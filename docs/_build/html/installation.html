@@ -4,8 +4,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; json-enhanced  documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Installation &#8212; json-enhanced  documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/pydoctheme.css" />
@@ -15,8 +16,10 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     
-    <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /><link rel="shortcut icon" type="image/png" href="_static/py.svg" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Basic types" href="basic_types.html" />
+    <link rel="prev" title="Welcome to json-enhanced’s documentation!" href="index.html" /><link rel="shortcut icon" type="image/png" href="_static/py.svg" />
             <script type="text/javascript" src="_static/copybutton.js"></script>
             <script type="text/javascript" src="_static/menu.js"></script> 
   </head>
@@ -44,6 +47,28 @@
     <div class="menu-wrapper">
         <nav class="menu" role="navigation" aria-label="main navigation">
             <div class="language_switcher_placeholder"></div>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#pip-installation">Pip installation</a></li>
+<li><a class="reference internal" href="#docker-s-set-up">Docker’s set up</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to json-enhanced’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="basic_types.html"
+                        title="next chapter">Basic types</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -62,8 +87,14 @@
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="#" title="General Index"
+          <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="basic_types.html" title="Basic types"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to json-enhanced’s documentation!"
+             accesskey="P">previous</a> |</li>
           <li><img src="_static/py.svg" alt="python logo" style="vertical-align: middle; margin-top: -1px"/></li>
           <li><a href="https://www.python.org/">Python</a> &#187;</li>
           <li class="switchers">
@@ -75,7 +106,7 @@
               <a href="index.html">json-enhanced  documentation</a> &#187;
               
           </li>
-        <li class="nav-item nav-item-this"><a href="">Index</a></li>
+        <li class="nav-item nav-item-this"><a href="">Installation</a></li>
                 <li class="right">
                     
 
@@ -98,12 +129,23 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
-</div>
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<section id="pip-installation">
+<h2>Pip installation<a class="headerlink" href="#pip-installation" title="Permalink to this headline">¶</a></h2>
+<p>This package can be installed via pip, by simply typing:</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">json-enhanced</span></code></p>
+</section>
+<section id="docker-s-set-up">
+<h2>Docker’s set up<a class="headerlink" href="#docker-s-set-up" title="Permalink to this headline">¶</a></h2>
+<p>Additionally, if you have Docker installed on your Linux system, we provide a bash script, called <code class="docutils literal notranslate"><span class="pre">build.sh</span></code>,
+which comes preloaded with the entire ecosystem of the library; the main modules and objects, and a predefined <code class="docutils literal notranslate"><span class="pre">test</span></code> variable with some json data.
+You can access an Ipython terminal by entering the following command:</p>
+<p><code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">build.sh</span></code></p>
+<p>Also, if you want to load a local resource from your host system into the container, you can point to it with an additional argument on the script’s call:</p>
+<p><code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">build.sh</span> <span class="pre">&lt;resource_path&gt;</span></code></p>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -112,6 +154,28 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#pip-installation">Pip installation</a></li>
+<li><a class="reference internal" href="#docker-s-set-up">Docker’s set up</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to json-enhanced’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="basic_types.html"
+                        title="next chapter">Basic types</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -130,8 +194,14 @@
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="#" title="General Index"
+          <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="basic_types.html" title="Basic types"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to json-enhanced’s documentation!"
+             >previous</a> |</li>
           <li><img src="_static/py.svg" alt="python logo" style="vertical-align: middle; margin-top: -1px"/></li>
           <li><a href="https://www.python.org/">Python</a> &#187;</li>
           <li class="switchers">
@@ -143,7 +213,7 @@
               <a href="index.html">json-enhanced  documentation</a> &#187;
               
           </li>
-        <li class="nav-item nav-item-this"><a href="">Index</a></li>
+        <li class="nav-item nav-item-this"><a href="">Installation</a></li>
                 <li class="right">
                     
 
