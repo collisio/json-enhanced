@@ -225,6 +225,59 @@ such as browsing the nested object by attribute access with autocompletion featu
     <span class="s1">&#39;Gloria&#39;</span>
 </pre></div>
 </div>
+<p>Or changing node elements as we want:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_0</span><span class="o">.</span><span class="n">hobbies</span><span class="o">.</span><span class="n">_1</span> <span class="o">=</span> <span class="s2">&quot;SLEEPING&quot;</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">json_object</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Daniel&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;hobbies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;music&quot;</span><span class="p">,</span> <span class="s2">&quot;SLEEPING&quot;</span><span class="p">,</span> <span class="s2">&quot;football&quot;</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Gloria&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+                <span class="s2">&quot;hobbies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tennis&quot;</span><span class="p">,</span> <span class="s2">&quot;music&quot;</span><span class="p">,</span> <span class="s2">&quot;programming&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>But probably the most important feature is the ability to make queries, following a syntax
+similar to the one offered by Django’s ORM. Let’s see some examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">hobbies__contains</span><span class="o">=</span><span class="s2">&quot;football&quot;</span><span class="p">)</span>
+    <span class="o">&lt;</span><span class="n">QuerySet</span> <span class="p">[[</span><span class="s1">&#39;music&#39;</span><span class="p">,</span> <span class="s1">&#39;SLEEPING&#39;</span><span class="p">,</span> <span class="s1">&#39;football&#39;</span><span class="p">]]</span><span class="o">&gt;</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">age__lt</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">include_parent_</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span> <span class="c1"># retrieving the first query result including parent object (the inner dict)</span>
+    <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Gloria&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s1">&#39;hobbies&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;tennis&#39;</span><span class="p">,</span> <span class="s1">&#39;music&#39;</span><span class="p">,</span> <span class="s1">&#39;programming&#39;</span><span class="p">]}</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">name__regex</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;(?:Daniel|Gloria)&quot;</span><span class="p">)</span>
+    <span class="o">&lt;</span><span class="n">QuerySet</span> <span class="p">[</span><span class="s1">&#39;Daniel&#39;</span><span class="p">,</span> <span class="s1">&#39;Gloria&#39;</span><span class="p">]</span><span class="o">&gt;</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">hobbies__contains</span><span class="o">=</span><span class="s2">&quot;music&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="c1"># counting the number of nodes with &#39;music&#39; as hobbie</span>
+    <span class="mi">2</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">json_object</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">hobbies</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">All</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="c1"># updating all hobbies nodes to null values</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">json_object</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Daniel&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;hobbies&quot;</span><span class="p">:</span> <span class="kc">None</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Gloria&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+                <span class="s2">&quot;hobbies&quot;</span><span class="p">:</span> <span class="kc">None</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 

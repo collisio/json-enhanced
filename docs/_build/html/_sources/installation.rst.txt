@@ -72,3 +72,60 @@ such as browsing the nested object by attribute access with autocompletion featu
 
     >> json_object.data._1.name
         'Gloria'
+
+Or changing node elements as we want:
+
+.. code-block:: python
+
+    >> json_object.data._0.hobbies._1 = "SLEEPING"
+
+    >> json_object
+        {
+            "data": [
+                {
+                    "name": "Daniel",
+                    "age": 30,
+                    "hobbies": ["music", "SLEEPING", "football"]
+                },
+                {
+                    "name": "Gloria",
+                    "age": 25,
+                    "hobbies": ["tennis", "music", "programming"]
+                }
+            ]
+        }
+
+But probably the most important feature is the ability to make queries, following a syntax
+similar to the one offered by Django's ORM. Let's see some examples:
+
+.. code-block:: python
+
+    >> json_object.query(hobbies__contains="football")
+        <QuerySet [['music', 'SLEEPING', 'football']]>
+
+    >> json_object.query(age__lt=30, include_parent_=True).first() # retrieving the first query result including parent object (the inner dict)
+        {'name': 'Gloria', 'age': 25, 'hobbies': ['tennis', 'music', 'programming']}
+
+    >> json_object.query(name__regex=r"(?:Daniel|Gloria)")
+        <QuerySet ['Daniel', 'Gloria']>
+
+    >> json_object.query(hobbies__contains="music").count() # counting the number of nodes with 'music' as hobbie
+        2
+
+    >> json_object.query(hobbies=js.All).update(None) # updating all hobbies nodes to null values
+
+    >> json_object
+        {
+            "data": [
+                {
+                    "name": "Daniel",
+                    "age": 30,
+                    "hobbies": None
+                },
+                {
+                    "name": "Gloria",
+                    "age": 25,
+                    "hobbies": None
+                }
+            ]
+        }
