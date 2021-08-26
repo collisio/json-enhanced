@@ -306,6 +306,54 @@ class JSONCompose(JSONNode):
                 queryset += child.query(include_parent_=include_parent_, **q)
         return queryset
 
+    def annotate(self, **kwargs):
+        """
+        Annotate key:value pairs in each dict's child.
+        If a key already exists, then ignore it.
+
+        Example
+        -------
+
+        import jsonutils as js
+
+        data = js.JSONObject(
+            {
+                "A": [
+                    {
+                        "A1": 1
+                    },
+                    {
+                        "A2": 2
+                    }
+                ],
+                "B": {
+                    "B1": 1,
+                    "B2": 2
+                }
+            }
+        )
+        """
+
+        if isinstance(self, JSONDict):
+            _registered_keys = set()
+            for key, value in kwargs.items():
+                # if key from annotation is not in dict keys, register it
+                if key not in self.keys():
+                    child = JSONObject(value)
+                    child._key = key
+                    child.parent = self
+                    self.__setitem__(key, child)
+                    _registered_keys.add(child._id)
+
+            for ch in self._child_objects.values_except(_registered_keys):
+                if ch.is_composed:
+                    ch.annotate(**kwargs)
+        elif isinstance(self, JSONList):
+            for ch in self._child_objects.values():
+                if ch.is_composed:
+                    ch.annotate(**kwargs)
+        return self
+
 
 class JSONSingleton(JSONNode):
     """
@@ -375,8 +423,8 @@ class JSONDict(dict, JSONCompose):
             return self.__setitem__(name, value)
 
     def copy(self):
-        obj = type(self)(self)
-        obj.__dict__.update(self.__dict__)
+        cls = self.__class__
+        obj = cls(self.json_decode)
         return obj
 
     # ---- COMPARISON METHODS ----
@@ -414,8 +462,8 @@ class JSONList(list, JSONCompose):
         return super().append(child)
 
     def copy(self):
-        obj = type(self)(self)
-        obj.__dict__.update(self.__dict__)
+        cls = self.__class__
+        obj = cls(self.json_decode)
         return obj
 
     def length(self):

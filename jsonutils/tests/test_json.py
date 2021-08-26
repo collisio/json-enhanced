@@ -585,3 +585,30 @@ class JsonTest(unittest.TestCase):
         self.assertListEqual(test3, JSONObject(["first", "second", {"A": [3, "last"]}]))
         self.assertFalse(test3.query(A__contains=4).exists())
         self.assertTrue(test3.query(A__contains="last").exists())
+
+    def test_annotations(self):
+
+        test = self.test1.copy()
+        test2 = self.test1.copy()
+
+        self.assertEqual(
+            test.annotate(a1=1, a2=2),
+            JSONObject(
+                [
+                    {"Float": 2.3, "Int": 1, "Str": "string", "a1": 1, "a2": 2},
+                    {
+                        "Dict": {"Float": 0.0, "List": [1, 2, 3], "a1": 1, "a2": 2},
+                        "a1": 1,
+                        "a2": 2,
+                    },
+                ]
+            ),
+        )
+
+        self.assertEqual(test._1.Dict.a2.jsonpath, "1/Dict/a2/")
+        self.assertEqual(test.query(a1=1).count(), 3)
+
+        self.assertEqual(
+            test2.annotate(a1={"status": "OK"}).query(a1__contains="status"),
+            [{"status": "OK"}, {"status": "OK"}, {"status": "OK"}],
+        )
