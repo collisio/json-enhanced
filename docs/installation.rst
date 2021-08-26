@@ -77,7 +77,7 @@ Or changing node elements as we want:
 
 .. code-block:: python
 
-    >> json_object.data._0.hobbies._1 = "SLEEPING"
+    json_object.data._0.hobbies._1 = "SLEEPING"
 
     >> json_object
         {

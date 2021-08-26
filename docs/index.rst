@@ -11,6 +11,7 @@ Welcome to json-enhanced's documentation!
    :caption: Table of contents:
 
    installation
+   comparison
    basic_types
 
 

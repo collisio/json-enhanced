@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Comparison with other related libraries &mdash; json-enhanced  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Basic types" href="basic_types.html" />
+    <link rel="prev" title="Installation &amp; Quickstart" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> json-enhanced
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Table of contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation &amp; Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Comparison with other related libraries</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#jsonpath-ng">jsonpath-ng</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objectpath">objectpath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pandas">pandas</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_types.html">Basic types</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">json-enhanced</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Comparison with other related libraries</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/comparison.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="comparison-with-other-related-libraries">
+<h1>Comparison with other related libraries<a class="headerlink" href="#comparison-with-other-related-libraries" title="Permalink to this headline">¶</a></h1>
+<p>There are other libraries that implement similar functionality to that of json-enhanced,
+but all of them use their own syntax for querying data, whereas json-enhanced uses a purely Python syntax,
+based on Django’s ORM.</p>
+<p>Let’s see a quick usage comparison between the different related packages.</p>
+<div class="section" id="jsonpath-ng">
+<h2>jsonpath-ng<a class="headerlink" href="#jsonpath-ng" title="Permalink to this headline">¶</a></h2>
+<p>Perhaps the most used library to cover this type of needs.
+Following the example concerning authors and books, published on its web site:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">with jsonpath-ng</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;store&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;book&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;reference&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Nigel Rees&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sayings of the Century&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mf">8.95</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;fiction&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Evelyn Waugh&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sword of Honour&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mf">12.99</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;fiction&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Herman Melville&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Moby Dick&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;isbn&quot;</span><span class="p">:</span> <span class="s2">&quot;0-553-21311-3&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mf">8.99</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;fiction&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;J. R. R. Tolkien&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;The Lord of the Rings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;isbn&quot;</span><span class="p">:</span> <span class="s2">&quot;0-395-19395-8&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mf">22.99</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;bicycle&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="mf">19.95</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kn">from</span> <span class="nn">jsonpath_ng.ext</span> <span class="kn">import</span> <span class="n">parse</span>
+
+<span class="c1"># retrieving the authors of all books in the store</span>
+<span class="n">query_all_book_authors</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">&quot;$.store.book[*].author&quot;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;</span> <span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">query_all_book_authors</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span>
+    <span class="p">[</span><span class="s1">&#39;Nigel Rees&#39;</span><span class="p">,</span> <span class="s1">&#39;Evelyn Waugh&#39;</span><span class="p">,</span> <span class="s1">&#39;Herman Melville&#39;</span><span class="p">,</span> <span class="s1">&#39;J. R. R. Tolkien&#39;</span><span class="p">]</span>
+
+<span class="c1"># getting the json path of the first author</span>
+<span class="o">&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">query_all_book_authors</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">full_path</span><span class="p">)</span>
+    <span class="s1">&#39;store.book.[0].author&#39;</span>
+
+<span class="c1"># filter all books with isbn number</span>
+<span class="n">query_isbn_books</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">&quot;$..book[?(@.isbn)]&quot;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;</span> <span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">query_isbn_books</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span>
+    <span class="p">[{</span><span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;fiction&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;Herman Melville&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Moby Dick&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;isbn&#39;</span><span class="p">:</span> <span class="s1">&#39;0-553-21311-3&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mf">8.99</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;fiction&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;J. R. R. Tolkien&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;The Lord of the Rings&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;isbn&#39;</span><span class="p">:</span> <span class="s1">&#39;0-395-19395-8&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mf">22.99</span><span class="p">}]</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">with json-enhanced</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">jsonutils</span> <span class="k">as</span> <span class="nn">js</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">js</span><span class="o">.</span><span class="n">JSONObject</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="c1"># load previous data as a JSONNode instance</span>
+
+<span class="c1"># retrieving the authors of all books in the store</span>
+<span class="o">&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">book</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">author</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">All</span><span class="p">)</span> <span class="c1"># just one statement</span>
+    <span class="o">&lt;</span><span class="n">QuerySet</span> <span class="p">[</span><span class="s1">&#39;Nigel Rees&#39;</span><span class="p">,</span> <span class="s1">&#39;Evelyn Waugh&#39;</span><span class="p">,</span> <span class="s1">&#39;Herman Melville&#39;</span><span class="p">,</span> <span class="s1">&#39;J. R. R. Tolkien&#39;</span><span class="p">]</span><span class="o">&gt;</span>
+
+<span class="c1"># getting the json path of the first author</span>
+<span class="o">&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">book</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">author</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">All</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">jsonpath</span>
+    <span class="n">store</span><span class="o">/</span><span class="n">book</span><span class="o">/</span><span class="mi">0</span><span class="o">/</span><span class="n">author</span><span class="o">/</span>
+
+<span class="c1"># or if we want a python path expression</span>
+<span class="o">&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">book</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">author</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">All</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">jsonpath</span><span class="o">.</span><span class="n">expr</span>
+    <span class="s1">&#39;[&quot;store&quot;][&quot;book&quot;][0][&quot;author&quot;]&#39;</span>
+
+<span class="c1"># filter all books with isbn number</span>
+<span class="o">&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">book</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">isbn__isnull</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">include_parent_</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="o">&lt;</span><span class="n">QuerySet</span> <span class="p">[{</span><span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;fiction&#39;</span><span class="p">,</span> <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;Herman Melville&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Moby Dick&#39;</span><span class="p">,</span> <span class="s1">&#39;isbn&#39;</span><span class="p">:</span> <span class="s1">&#39;0-553-21311-3&#39;</span><span class="p">,</span> <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mf">8.99</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;fiction&#39;</span><span class="p">,</span> <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;J. R. R. Tolkien&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;The Lord of the Rings&#39;</span><span class="p">,</span> <span class="s1">&#39;isbn&#39;</span><span class="p">:</span> <span class="s1">&#39;0-395-19395-8&#39;</span><span class="p">,</span> <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mf">22.99</span><span class="p">}]</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="objectpath">
+<h2>objectpath<a class="headerlink" href="#objectpath" title="Permalink to this headline">¶</a></h2>
+<p>This library is currently out of maintenance. Its syntax is very similar to that of jsonpath-ng.
+Let’s compare its functionality following the example of json above.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">with objectpath</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">objectpath</span> <span class="kn">import</span> <span class="n">Tree</span>
+
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="c1"># loading the data above</span>
+
+<span class="c1"># retrieving books with price greater than 12</span>
+<span class="o">&gt;&gt;</span> <span class="nb">list</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;$.store.book[@.price &gt; 12]&quot;</span><span class="p">))</span>
+    <span class="p">[{</span><span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;fiction&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;Evelyn Waugh&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Sword of Honour&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mf">12.99</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;fiction&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;J. R. R. Tolkien&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;The Lord of the Rings&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;isbn&#39;</span><span class="p">:</span> <span class="s1">&#39;0-395-19395-8&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mf">22.99</span><span class="p">}]</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">with json-enhanced</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">jsonutils</span> <span class="k">as</span> <span class="nn">js</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">js</span><span class="o">.</span><span class="n">JSONObject</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># retrieving books with price greater than 12</span>
+<span class="o">&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">book</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">price__gt</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span> <span class="c1"># without including parent nodes</span>
+    <span class="o">&lt;</span><span class="n">QuerySet</span> <span class="p">[</span><span class="mf">12.99</span><span class="p">,</span> <span class="mf">22.99</span><span class="p">]</span><span class="o">&gt;</span>
+
+<span class="c1"># getting the last element&#39;s parent</span>
+<span class="o">&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">book</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">price__gt</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
+    <span class="p">{</span><span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;fiction&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;J. R. R. Tolkien&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;The Lord of the Rings&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;isbn&#39;</span><span class="p">:</span> <span class="s1">&#39;0-395-19395-8&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mf">22.99</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="pandas">
+<h2>pandas<a class="headerlink" href="#pandas" title="Permalink to this headline">¶</a></h2>
+<p>The pandas library offers very user-friendly tools for querying structured data.
+The main problem is that it can only properly read data that has a defined structure (which can be converted to a dataframe).
+In the case we are concerned with here, we could proceed as follows:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">with pandas</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">json_normalize</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;book&quot;</span><span class="p">]])</span>
+
+<span class="o">&gt;&gt;</span> <span class="n">df</span>
+        <span class="n">category</span>            <span class="n">author</span>                   <span class="n">title</span>  <span class="n">price</span>           <span class="n">isbn</span>
+    <span class="mi">0</span>  <span class="n">reference</span>        <span class="n">Nigel</span> <span class="n">Rees</span>  <span class="n">Sayings</span> <span class="n">of</span> <span class="n">the</span> <span class="n">Century</span>   <span class="mf">8.95</span>            <span class="n">NaN</span>
+    <span class="mi">1</span>    <span class="n">fiction</span>      <span class="n">Evelyn</span> <span class="n">Waugh</span>         <span class="n">Sword</span> <span class="n">of</span> <span class="n">Honour</span>  <span class="mf">12.99</span>            <span class="n">NaN</span>
+    <span class="mi">2</span>    <span class="n">fiction</span>   <span class="n">Herman</span> <span class="n">Melville</span>               <span class="n">Moby</span> <span class="n">Dick</span>   <span class="mf">8.99</span>  <span class="mi">0</span><span class="o">-</span><span class="mi">553</span><span class="o">-</span><span class="mi">21311</span><span class="o">-</span><span class="mi">3</span>
+    <span class="mi">3</span>    <span class="n">fiction</span>  <span class="n">J</span><span class="o">.</span> <span class="n">R</span><span class="o">.</span> <span class="n">R</span><span class="o">.</span> <span class="n">Tolkien</span>   <span class="n">The</span> <span class="n">Lord</span> <span class="n">of</span> <span class="n">the</span> <span class="n">Rings</span>  <span class="mf">22.99</span>  <span class="mi">0</span><span class="o">-</span><span class="mi">395</span><span class="o">-</span><span class="mi">19395</span><span class="o">-</span><span class="mi">8</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="basic_types.html" class="btn btn-neutral float-right" title="Basic types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation &amp; Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Collisio Technologies.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
