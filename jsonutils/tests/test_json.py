@@ -590,6 +590,7 @@ class JsonTest(unittest.TestCase):
 
         test = self.test1.copy()
         test2 = self.test1.copy()
+        test3 = JSONObject([1, 2, {"A": [1, 2, {"B": 3}], "B": 4}])
 
         self.assertEqual(
             test.annotate(a1=1, a2=2),
@@ -607,8 +608,38 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test._1.Dict.a2.jsonpath, "1/Dict/a2/")
         self.assertEqual(test.query(a1=1).count(), 3)
+        self.assertNotEqual(test, self.test1)
 
         self.assertEqual(
             test2.annotate(a1={"status": "OK"}).query(a1__contains="status"),
             [{"status": "OK"}, {"status": "OK"}, {"status": "OK"}],
         )
+
+        self.assertEqual(
+            test3.annotate(C=1, D=2),
+            JSONObject(
+                [1, 2, {"A": [1, 2, {"B": 3, "C": 1, "D": 2}], "B": 4, "C": 1, "D": 2}]
+            ),
+        )
+
+        # now we remove the annotations and check if recovers original object
+
+        test._remove_annotations()
+
+        self.assertEqual(test, self.test1)
+        self.assertFalse(test.query(a1=All).exists())
+
+    def test_pop(self):
+
+        test = JSONObject({"data": [{"name": "Dan", "age": 30}]})
+
+        self.assertSetEqual(set(test.data._0._child_objects.values()), {"Dan", 30})
+        self.assertEqual(test.data._0.name, "Dan")
+
+        # remove a child
+
+        test.data._0.pop("name")
+
+        self.assertSetEqual(set(test.data._0._child_objects.values()), {30})
+        self.assertFalse(test.query(name=All).exists())
+        self.assertRaises(AttributeError, lambda: test.data._0.name)
