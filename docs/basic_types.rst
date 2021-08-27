@@ -1,4 +1,2 @@
 Basic types
 ===========
-
-AA
