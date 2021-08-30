@@ -332,6 +332,30 @@ class JSONCompose(JSONNode):
                 }
             }
         )
+
+        >> data.annotate(C=3, D=4)
+            {
+                "A": [
+                    {
+                        "A1": 1,
+                        "C": 3,
+                        "D": 4
+                    },
+                    {
+                        "A2": 2,
+                        "C": 3,
+                        "D": 4
+                    }
+                ],
+                "B": {
+                    "B1": 1,
+                    "B2": 2,
+                    "C": 3,
+                    "D": 4
+                },
+                "C": 3,
+                "D": 4
+            }
         """
 
         if isinstance(self, JSONDict):
@@ -342,6 +366,7 @@ class JSONCompose(JSONNode):
                     child = JSONObject(value)
                     child._key = key
                     child.parent = self
+                    child._is_annotation = True
                     self.__setitem__(key, child)
                     _registered_keys.add(child._id)
 
@@ -353,6 +378,20 @@ class JSONCompose(JSONNode):
                 if ch.is_composed:
                     ch.annotate(**kwargs)
         return self
+
+    def _remove_annotations(self):
+
+        if isinstance(self, JSONDict):
+            for key, value in list(self.items()):
+                if hasattr(value, "_is_annotation"):
+                    self.pop(key)
+                if value.is_composed:
+                    value._remove_annotations()
+
+        elif isinstance(self, JSONList):
+            for item in self:
+                if item.is_composed:
+                    item._remove_annotations()
 
 
 class JSONSingleton(JSONNode):
@@ -368,6 +407,8 @@ class JSONSingleton(JSONNode):
 # ---- COMPOSE OBJECTS ----
 class JSONDict(dict, JSONCompose):
     """ """
+
+    _DEFAULT = object()
 
     def __init__(self, *args, **kwargs):
 
@@ -417,7 +458,16 @@ class JSONDict(dict, JSONCompose):
     def __setattr__(self, name, value):
         """To define behaviour when setting an atributte. It must register a new node if not a reserved keyword"""
 
-        if name in ("_key", "_index", "parent", "_id", "_child_objects"):
+        RESERVED_ATTRIBUTES = (
+            "_key",
+            "_index",
+            "parent",
+            "_id",
+            "_child_objects",
+            "_is_annotation",
+        )
+
+        if name in RESERVED_ATTRIBUTES:
             return super().__setattr__(name, value)
         else:
             return self.__setitem__(name, value)
@@ -426,6 +476,19 @@ class JSONDict(dict, JSONCompose):
         cls = self.__class__
         obj = cls(self.json_decode)
         return obj
+
+    def pop(self, key, default=_DEFAULT):
+        """
+        When removing a key from dict, we also must unregister the corresponding child
+        from _child_objects dictionary
+        """
+        if key in self or default is self._DEFAULT:
+            child = self[key]  # getting the child
+            del self[key]
+            self._child_objects.pop(child._id, None)  # unregister child
+            return child
+        else:
+            return default
 
     # ---- COMPARISON METHODS ----
     def __eq__(self, other):
@@ -575,6 +638,9 @@ class JSONStr(str, JSONSingleton):
         """Trye to parse a bool object from self string."""
 
         return parse_bool(self)
+
+    def __hash__(self):
+        return super().__hash__()
 
     # comparison magic methods
     # if data types are not compatible, then return False (no error thrown)
@@ -755,6 +821,9 @@ class JSONFloat(float, JSONSingleton):
         obj._data = fl
         return obj
 
+    def __hash__(self):
+        return super().__hash__()
+
     def __eq__(self, other):
         try:
             return super().__eq__(parse_float(other))
@@ -791,6 +860,9 @@ class JSONInt(int, JSONSingleton):
         obj = super().__new__(cls, i)
         obj._data = i
         return obj
+
+    def __hash__(self):
+        return super().__hash__()
 
     def __eq__(self, other):
         try:
