@@ -1,32 +1,23 @@
-Installation & Quickstart
+Introduction
 =========================
 
-Pip installation
+Installation
 ----------------
 
-This package can be installed via pip, by simply typing:
+This library can be installed with pip:
 
-``pip install json-enhanced``
+.. code-block:: bash
+    pip install json-enhanced
 
-Docker's set up
----------------
-
-Additionally, if you have Docker installed on your Linux system, we provide a bash script, called ``build.sh``,
-which comes preloaded with the entire ecosystem of the library; the main modules and objects, and a predefined ``test`` variable with some json data.
-You can access an Ipython terminal by entering the following command:
-
-``bash build.sh``
-
-Also, if you want to load a local resource from your host system into the container, you can point to it with an additional argument on the script's call:
-
-``bash build.sh <resource_path>``
+We recommend a virtual environment (https://dev.to/bowmanjd/python-tools-for-managing-virtual-environments-3bko#howto)
 
 Quickstart
 ----------
 
 To start, we import the module into our workspace:
 
-``import jsonutils as js``
+.. code-block:: python
+    import jsonutils as js
 
 There are different ways to load a JSON object in our interpreter:
 
@@ -51,24 +42,23 @@ There are different ways to load a JSON object in our interpreter:
         }
     )
 
-* By calling the method ``open`` of ``JSONObject`` class. This method detects whether the argument entered
-  corresponds to a local path or a remote web page.
+* By calling the method ``open`` of the ``JSONObject`` class:
 
-  .. code-block:: python
+.. code-block:: python
 
     json_object = js.JSONObject.open("<path_of_json_file>") # to open a local json file
 
     json_object = js.JSONObject.open("<url_of_json_file>") # to open a remote url json file
 
-  if requesting a remote url, it must include http or https protocol in order to be validated.
+.. note:: The method automatically detects if the argument is a local path or a remote URL. Remote URLs must contain the protocol (http/https).
 
 Once the json data has been loaded as a ``JSONNode`` instance, we will be able to perform some useful things,
 such as browsing the nested object by attribute access with autocompletion features:
 
 .. code-block:: python
 
-    >> json_object.data._0.hobbies._1
-        'reading'
+    json_object.data._0.hobbies._1
+    # 'reading'
 
     >> json_object.data._1.name
         'Gloria'

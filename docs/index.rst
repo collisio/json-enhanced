@@ -6,15 +6,14 @@
 Welcome to json-enhanced's documentation!
 =========================================
 
+.. note:: JSON Enhanced currently supports Python 3.8 and higher.
+
 .. toctree::
    :maxdepth: 2
    :caption: Table of contents:
 
-   installation
+   introduction
    comparison
-   basic_types
-
-
 
 
 Indices and tables
