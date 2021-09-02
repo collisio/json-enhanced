@@ -46,20 +46,20 @@ json_data = js.JSONObject(
 )
 
 # Now we can navegate through this object by attribute accesion:
-print(json_data.data._1.name)
+json_data.data._1.name
 # 'Mar'
 
 # Or we can make queries. The syntax is very similar to Django's querysets:
 result = json_data.query(birthday__lt=datetime(1985,1,1))
 
-print(result)
+result
 # <QuerySet ['1950-06-02 16:00:00']>
 
-print(result.first().parent)
+result.first().parent
 # {'name': 'Carl', 'birthday': '1950-06-02 16:00:00', 'publications': 36}
 
 # We can also retrieve the path of a node:
-print(result.first().jsonpath)
+result.first().jsonpath
 # data/2/
 ```
 
