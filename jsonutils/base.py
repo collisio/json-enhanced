@@ -448,6 +448,12 @@ class JSONSingleton(JSONNode):
 
     is_composed = False
 
+    def query(self, recursive_=None, include_parent_=None, stop_at_match_=None, **q):
+        return QuerySet()
+
+    def get(self, recursive_=None, include_parent_=None, throw_exceptions_=None, **q):
+        return
+
 
 # ---- COMPOSE OBJECTS ----
 class JSONDict(dict, JSONCompose):
