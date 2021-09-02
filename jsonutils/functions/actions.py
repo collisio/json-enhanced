@@ -443,9 +443,6 @@ def _type(node, requested_value):
             f"Requested value must be a valid type, not {requested_value}"
         )
 
-    if requested_value in (None, "None"):
-        requested_value = type(None)
-
     if isinstance(node, JSONBool):
         if requested_value in (bool, "bool"):
             return True
