@@ -10,7 +10,11 @@ import requests
 
 import jsonutils.config as config
 from jsonutils.encoders import JSONObjectEncoder
-from jsonutils.exceptions import JSONDecodeException
+from jsonutils.exceptions import (
+    JSONDecodeException,
+    JSONQueryException,
+    JSONQueryMultipleValues,
+)
 from jsonutils.functions.parsers import (
     _parse_query,
     parse_bool,
@@ -287,12 +291,20 @@ class JSONCompose(JSONNode):
                 child.parent = self
                 self.__setitem__(index, child)
 
-    def query(self, recursive_=None, include_parent_=None, **q):
+    def query(self, recursive_=None, include_parent_=None, stop_at_match_=None, **q):
+        if not isinstance(stop_at_match_, (int, type(None))):
+            raise TypeError(
+                f"Argument stop_at_match_ must be an integer or NoneType, not {type(stop_at_match_)}"
+            )
+
         # within a particular parent node, each child in _child_objects registry must have a unique key
+
+        # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
             recursive_ = config.recursive_queries
         if include_parent_ is None:
             include_parent_ = config.include_parents
+        # ------------------------
         queryset = QuerySet()
         queryset._root = self  # the node which sends the query
         children = self._child_objects.values()
@@ -301,10 +313,43 @@ class JSONCompose(JSONNode):
             check, obj = _parse_query(child, include_parent_, **q)
             if check:
                 queryset.append(obj)
+                if stop_at_match_ and queryset.count() >= stop_at_match_:
+                    return queryset
+
             # if child is also a compose object, it will send the same query to its children recursively
             if child.is_composed and recursive_:
                 queryset += child.query(include_parent_=include_parent_, **q)
         return queryset
+
+    def get(self, recursive_=None, include_parent_=None, throw_exceptions_=None, **q):
+
+        # ---- DYNAMIC CONFIG ----
+        if recursive_ is None:
+            recursive_ = config.recursive_queries
+        if include_parent_ is None:
+            include_parent_ = config.include_parents
+        if throw_exceptions_ is None:
+            throw_exceptions_ = config.query_exceptions
+        # ------------------------
+        query = self.query(
+            recursive_=recursive_,
+            include_parent_=include_parent_,
+            stop_at_match_=2,
+            **q,
+        )
+
+        if not query.exists():
+            if throw_exceptions_:
+                raise JSONQueryException("The query has not returned any result")
+            else:
+                return
+        elif query.count() > 1:
+            if throw_exceptions_:
+                raise JSONQueryMultipleValues("More than one value returned by query")
+            else:
+                return query.first()
+        else:
+            return query.first()
 
     def annotate(self, **kwargs):
         """
@@ -409,6 +454,7 @@ class JSONDict(dict, JSONCompose):
     """ """
 
     _DEFAULT = object()
+    get = JSONCompose.get  # override get method
 
     def __init__(self, *args, **kwargs):
 

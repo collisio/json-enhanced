@@ -1,5 +1,5 @@
 import json
-from jsonutils.exceptions import JSONQueryException
+from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
 import unittest
 from datetime import datetime
 
@@ -313,6 +313,27 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             json.dumps(self.test4, cls=JSONObjectEncoder),
             '{"List": [0, 0.1, "str", null], "Dict": {"Bool": true, "None": null}}',
+        )
+
+    def test_get(self):
+        test = self.test6
+        test2 = self.test1
+
+        self.assertEqual(
+            test.get(timestamp="2021-05-01 08:00:00"),
+            test.query(timestamp="2021-05-01 08:00:00").first(),
+        )
+
+        self.assertRaises(JSONQueryMultipleValues, lambda: test.get(pos__0=1))
+
+        self.assertEqual(test2.get(Float=2.3), test2.query(Float="2.3").first())
+        self.assertRaises(JSONQueryMultipleValues, lambda: test2.get(Float__gt="-1"))
+        self.assertRaises(JSONQueryException, lambda: test2.get(Float__gt="-1"))
+
+        self.assertRaisesRegex(
+            JSONQueryException,
+            "The query has not returned any result",
+            lambda: test.get(timestamp="1895-01-01"),
         )
 
     def test_queries(self):

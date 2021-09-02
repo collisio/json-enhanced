@@ -10,3 +10,6 @@ class JSONSingletonException(Exception):
 
 class JSONDecodeException(Exception):
     pass
+
+class JSONQueryMultipleValues(JSONQueryException):
+    pass
