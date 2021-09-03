@@ -239,4 +239,9 @@ class JsonTest(unittest.TestCase):
             datetime(2021, 1, 1, tzinfo=pytz.utc),
         )
 
+        self.assertEqual(
+            parse_datetime("2020-07-14T12:31:45Z"),
+            datetime(2020, 7, 14, 12, 31, 45, tzinfo=pytz.utc),
+        )
+
         self.assertIsNone(parse_datetime(object, fail_silently=True))
