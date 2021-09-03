@@ -7,6 +7,7 @@ from datetime import date, datetime
 import pytz
 from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
+from jsonutils.functions.decorators import catch_exceptions
 from jsonutils.query import All, AllChoices
 
 
@@ -150,7 +151,8 @@ def _parse_query(child, include_parent_, **q):
     return (True, child.parent if include_parent_ else child)
 
 
-def parse_float(s, decimal_sep=decimal_separator, thousands_sep=thousands_separator):
+@catch_exceptions
+def parse_float(s, decimal_sep=decimal_separator, thousands_sep=thousands_separator, fail_silently=False):
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
@@ -177,8 +179,8 @@ def parse_float(s, decimal_sep=decimal_separator, thousands_sep=thousands_separa
 
     return float("".join((sign, number_left, number_right)))
 
-
-def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False):
+@catch_exceptions
+def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False, fail_silently=False):
     """
     If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors).
     Algorithm is tzone aware by default. If no tzone is found on string, UTC will be considered.
@@ -283,8 +285,8 @@ def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False):
         return False
     raise JSONSingletonException(f"Can't parse target datetime: {s}")
 
-
-def parse_bool(s):
+@catch_exceptions
+def parse_bool(s, fail_silently=False):
     from jsonutils.base import JSONBool
 
     if isinstance(s, bool):
