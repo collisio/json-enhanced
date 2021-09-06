@@ -431,27 +431,109 @@ class JsonTest(unittest.TestCase):
                 {"text": "dummy text 6", "pos": [1, 1, 5]},
             ],
         )
-        # self.test8 = JSONObject(
-        #     {
-        #         "data_list": [
-        #             {"name": "", "id": 0, "list": [], "tuple": (), "none": None},
-        #             {},
-        #         ]
-        #     }
-        # )
         self.assertEqual(self.test8.query(list__isnull=True), QuerySet([[]]))
         self.assertEqual(self.test8.query(tuple__isnull=True), QuerySet([[]]))
         self.assertEqual(self.test8.query(none__isnull=True), QuerySet([None]))
         self.assertEqual(self.test8.query(id__isnull=True), QuerySet())
         self.assertEqual(self.test6.query(data__1=True), QuerySet([[False, True]]))
-        # UNCOMMENT THIS WHEN IMPLEMENTED
-        # self.assertEqual(
-        #     self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
-        #     [
+
+    def test_multiqueries(self):
+        test = JSONObject(
+            [
+                {
+                    "data": {
+                        "data": [
+                            1,
+                            2,
+                            {"data": 1, "date": "2021/08/01  12:00:00Z"},
+                            {"data": {"data": 1, "date": "2021-08-02"}},
+                        ],
+                        "date": "2021/08/01  13:00:00.003Z",
+                    },
+                    "date": datetime(2021, 9, 8),
+                }
+            ]
+        )
+
+        self.assertEqual(
+            self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
+            [
+                {"text": "dummy text 2", "pos": [3, 2]},
+                {"text": "dummy text 5", "pos": [4, 1]},
+            ],
+        )
+
+        self.assertEqual(
+            test.query(data=1, date__gte=datetime(2021, 8, 1)),
+            [
+                {"data": 1, "date": "2021/08/01  12:00:00Z"},
+                {"data": 1, "date": "2021-08-02"},
+            ],
+        )
+        self.assertEqual(
+            test.query(data__c_data__contains=1),
+            [
+                {
+                    "data": [
+                        1,
+                        2,
+                        {"data": 1, "date": "2021/08/01  12:00:00Z"},
+                        {"data": {"data": 1, "date": "2021-08-02"}},
+                    ],
+                    "date": "2021/08/01  13:00:00.003Z",
+                },
+                {"data": 1, "date": "2021-08-02"},
+            ],
+        )
+        self.assertEqual(
+            test.annotate(date=None).query(data__c_data__contains=1, date__isnull=True),
+            [{"data": {"data": 1, "date": "2021-08-02"}, "date": None}],
+        )
+
+    def test_queries_traversing(self):
+        # {
+        #     "position_data": [
+        #         {"text": "dummy text 1", "pos": [1, 2]},
         #         {"text": "dummy text 2", "pos": [3, 2]},
+        #         {"text": "dummy text 3", "pos": [1, 4]},
+        #         {"text": "dummy text 4", "pos": [2, 5]},
         #         {"text": "dummy text 5", "pos": [4, 1]},
+        #         {"text": "dummy text 6", "pos": [1, 1, 5]},
         #     ],
-        # )
+        #     "timestamp_data": [
+        #         {"value": 523687, "timestamp": "2021-05-01 08:00:00"},
+        #         {"value": 523689, "timestamp": "2021-05-01 09:00:00"},
+        #         {"value": 523787, "timestamp": "2021-05-02 08:30:00"},
+        #         {"value": 525687, "timestamp": "2021-05-05 18:00:25"},
+        #     ],
+        # "boolean_data": [
+        #     {"data": [True, 1]},
+        #     {"data": [False, None]},
+        #     {"data": [0, 1]},
+        #     {"data": (False, True)},
+        # ],
+        # }
+        test = self.test6
+
+        self.assertListEqual(
+            test.query(
+                data__parent__parent__0__c_data__1__exact="1", include_parent_=True
+            ),
+            [
+                {"data": [True, 1]},
+                {"data": [False, None]},
+                {"data": [0, 1]},
+                {"data": [False, True]},
+            ],
+        )
+        self.assertEqual(
+            test.query(
+                timestamp__lte="2021-05-01T23:59:00",
+                timestamp__parent__c_value__contains=89,
+                include_parent_=True,
+            ),
+            [{"value": 523689, "timestamp": "2021-05-01 09:00:00"}],
+        )
 
     def test_single_query_exact(self):
 

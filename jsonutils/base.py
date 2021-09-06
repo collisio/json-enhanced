@@ -318,7 +318,12 @@ class JSONCompose(JSONNode):
 
             # if child is also a compose object, it will send the same query to its children recursively
             if child.is_composed and recursive_:
-                queryset += child.query(include_parent_=include_parent_, **q)
+                queryset += child.query(
+                    recursive_=recursive_,
+                    include_parent_=include_parent_,
+                    stop_at_match_=stop_at_match_,
+                    **q,
+                )
         return queryset
 
     def get(self, recursive_=None, include_parent_=None, throw_exceptions_=None, **q):
@@ -424,18 +429,18 @@ class JSONCompose(JSONNode):
                     ch.annotate(**kwargs)
         return self
 
-    def _remove_annotations(self):
+    def _remove_annotations(self, recursive=True):
 
         if isinstance(self, JSONDict):
             for key, value in list(self.items()):
                 if hasattr(value, "_is_annotation"):
                     self.pop(key)
-                if value.is_composed:
+                if value.is_composed and recursive:
                     value._remove_annotations()
 
         elif isinstance(self, JSONList):
             for item in self:
-                if item.is_composed:
+                if item.is_composed and recursive:
                     item._remove_annotations()
 
 

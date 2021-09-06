@@ -11,7 +11,7 @@ from jsonutils.functions.decorators import catch_exceptions
 from jsonutils.query import All, AllChoices
 
 
-def _parse_query(child, include_parent_, **q):
+def _parse_query(node, include_parent_, **q):
     """
     We must determine whether the child passed as input argument matches the conditions given by the query q.
     If required actions don't match the child type, it won't throw any exception, just returns False for such an object, and
@@ -20,8 +20,13 @@ def _parse_query(child, include_parent_, **q):
         <key>__<modificator>__<query>
     """
     # TODO if a query contains two different keys, take into account the dict
+    from jsonutils.base import JSONNode
 
-    obj = child
+    class UniqueList(list):
+        def append(self, object):
+            return super().append(object) if object not in self else None
+
+    target_keys = UniqueList()
 
     for query_key, query_value in q.items():
         if not isinstance(
@@ -44,115 +49,86 @@ def _parse_query(child, include_parent_, **q):
             raise JSONQueryException(
                 f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, date, datetime, allchoices"
             )
-        splitted = query_key.split("__")
-        target_key = splitted[0]
-        if not target_key:
-            raise JSONQueryException("Bad query. Missing target key")
-        # first of all, if target key of query argument does not match child's key, we won't append it to querylist
-        if target_key != child._key:
-            return False, None
-        try:
-            target_action = splitted[1]
-        except IndexError:  # default action will be exact value match
-            target_action = "exact"
-        else:
-            try:
-                target_action_extra = splitted[2]
-            except IndexError:
-                target_action_extra = None
-        target_value = query_value  # this is the query argument value
-        # ---- MODIFICATORS ----
-        # modify obj before apply actions
-        if target_action == "parent":
-            obj = child.parent
-            target_action = target_action_extra if target_action_extra else "exact"
-        elif target_action.isdigit():  # if a digit, take such an element
-            if not isinstance(child, (tuple, list)):
-                return False, None
-            try:
-                obj = child[int(target_action)]
-            except Exception:  # if not a list
-                return False, None
-            else:
-                target_action = target_action_extra if target_action_extra else "exact"
-        # ---- MATCH ----
-        # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
-        # no errors will be thrown, if types are not compatible, just returns False
-        # TODO complete with node actions
-        if target_action == "exact":
-            if obj.exact_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "gt":
-            # child value must be greather than target value of query
-            if obj.gt_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "gte":
-            if obj.gte_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "lt":
-            if obj.lt_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "lte":
-            if obj.lte_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "contains":
-            if obj.contains_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "icontains":
-            if obj.icontains_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "in":
-            if obj.in_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "regex":
-            if obj.regex_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "fullregex":
-            if obj.fullregex_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "isnull":
-            if obj.isnull_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "length":
-            if obj.length_action(target_value):
-                pass
-            else:
-                return False, None
-        elif target_action == "type":
-            if obj.type_action(target_value):
-                pass
-            else:
-                return False, None
-        else:
-            raise JSONQueryException(f"Bad query: {target_action}")
+        splitted_query = [i for i in query_key.split("__") if i]
 
-    return (True, child.parent if include_parent_ else child)
+        if not splitted_query:
+            raise JSONQueryException("Bad query. Missing target key")
+
+        target_key = splitted_query[0]
+        target_actions = splitted_query[1:] or ["exact"]
+
+        target_keys.append(target_key)
+
+        if len(target_keys) > 1:  # MULTIQUERY MODE
+            target_actions = ["parent", f"c_{target_key}"] + target_actions
+            target_key = target_keys[0]
+            include_parent_ = True
+
+        # first of all, if target key of query argument does not match child's key, we won't append it to querylist
+        if target_key != node._key:
+            return False, None
+
+        # grab a list of node actions, without the action suffix
+        node_actions = [
+            i.replace("_action", "") for i in dir(JSONNode) if i.endswith("action")
+        ]
+        obj = node
+
+        actions_count = len(target_actions)
+
+        for idx, action in enumerate(target_actions):
+
+            # ---- MODIFICATORS ----
+            # modify obj before apply actions
+            if action == "parent":
+                obj = obj.parent
+                if obj is None:
+                    return False, None
+                if idx == actions_count - 1:
+                    action = "exact"  # if parent is last action, take exact as the default one
+                else:
+                    continue  # continue to next action
+            elif match := re.fullmatch(r"c_(\w+)", action):  # child modificator
+                try:
+                    obj = obj.__getitem__(match.group(1))
+                except Exception:
+                    return False, None
+                if idx == actions_count - 1:
+                    action = "exact"  # if child is last action, take exact as the default one
+                else:
+                    continue  # continue to next action
+            elif action.isdigit():
+                if not isinstance(obj, list):
+                    return False, None
+                try:
+                    obj = obj[int(action)]
+                except IndexError:
+                    return False, None
+                if idx == actions_count - 1:
+                    action = "exact"  # if digit is last action, take exact as the default one
+                else:
+                    continue  # continue to next action
+            # ---- MATCH ----
+            # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
+            # no errors will be thrown, if types are not compatible, just returns False
+            # node actions can't interfer with modificators
+            if action in node_actions:  # call corresponding node method
+                result = getattr(obj, action + "_action")(query_value)
+                if not result:
+                    return False, None
+            else:
+                raise JSONQueryException(f"Bad query: {action}")
+
+    return (True, node.parent if include_parent_ else node)
 
 
 @catch_exceptions
-def parse_float(s, decimal_sep=decimal_separator, thousands_sep=thousands_separator, fail_silently=False):
+def parse_float(
+    s,
+    decimal_sep=decimal_separator,
+    thousands_sep=thousands_separator,
+    fail_silently=False,
+):
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
@@ -179,8 +155,11 @@ def parse_float(s, decimal_sep=decimal_separator, thousands_sep=thousands_separa
 
     return float("".join((sign, number_left, number_right)))
 
+
 @catch_exceptions
-def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False, fail_silently=False):
+def parse_datetime(
+    s, only_check=False, tzone_aware=True, only_date=False, fail_silently=False
+):
     """
     If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors).
     Algorithm is tzone aware by default. If no tzone is found on string, UTC will be considered.
@@ -284,6 +263,7 @@ def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False, fail_
     if only_check:
         return False
     raise JSONSingletonException(f"Can't parse target datetime: {s}")
+
 
 @catch_exceptions
 def parse_bool(s, fail_silently=False):
