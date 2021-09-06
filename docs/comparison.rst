@@ -58,17 +58,17 @@ Following the example concerning authors and books, published on its web site:
     # retrieving the authors of all books in the store
     query_all_book_authors = parse("$.store.book[*].author")
 
-    >> [match.value for match in query_all_book_authors.find(data)]
+    [match.value for match in query_all_book_authors.find(data)]
         ['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien']
 
     # getting the json path of the first author
-    >> str(query_all_book_authors.find(data)[0].full_path)
+    str(query_all_book_authors.find(data)[0].full_path)
         'store.book.[0].author'
 
     # filter all books with isbn number
     query_isbn_books = parse("$..book[?(@.isbn)]")
 
-    >> [match.value for match in query_isbn_books.find(data)]
+    [match.value for match in query_isbn_books.find(data)]
         [{'category': 'fiction',
         'author': 'Herman Melville',
         'title': 'Moby Dick',
@@ -88,19 +88,19 @@ Following the example concerning authors and books, published on its web site:
     data = js.JSONObject(data) # load previous data as a JSONNode instance
 
     # retrieving the authors of all books in the store
-    >> data.store.book.query(author=js.All) # just one statement
+    data.store.book.query(author=js.All) # just one statement
         <QuerySet ['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien']>
 
     # getting the json path of the first author
-    >> data.store.book.query(author=js.All).first().jsonpath
+    data.store.book.query(author=js.All).first().jsonpath
         store/book/0/author/
 
     # or if we want a python path expression
-    >> data.store.book.query(author=js.All).first().jsonpath.expr
+    data.store.book.query(author=js.All).first().jsonpath.expr
         '["store"]["book"][0]["author"]'
 
     # filter all books with isbn number
-    >> data.store.book.query(isbn__isnull=False, include_parent_=True)
+    data.store.book.query(isbn__isnull=False, include_parent_=True)
         <QuerySet [{'category': 'fiction', 'author': 'Herman Melville', 'title': 'Moby Dick', 'isbn': '0-553-21311-3', 'price': 8.99}, {'category': 'fiction', 'author': 'J. R. R. Tolkien', 'title': 'The Lord of the Rings', 'isbn': '0-395-19395-8', 'price': 22.99}]>
 
 objectpath
@@ -117,7 +117,7 @@ Let's compare its functionality following the example of json above.
     tree = Tree(data) # loading the data above
 
     # retrieving books with price greater than 12
-    >> list(tree.execute("$.store.book[@.price > 12]"))
+    list(tree.execute("$.store.book[@.price > 12]"))
         [{'category': 'fiction',
         'author': 'Evelyn Waugh',
         'title': 'Sword of Honour',
@@ -136,11 +136,11 @@ Let's compare its functionality following the example of json above.
     data = js.JSONObject(data)
 
     # retrieving books with price greater than 12
-    >> data.store.book.query(price__gt=12) # without including parent nodes
+    data.store.book.query(price__gt=12) # without including parent nodes
         <QuerySet [12.99, 22.99]>
 
     # getting the last element's parent
-    >> data.store.book.query(price__gt=12).last().parent
+    data.store.book.query(price__gt=12).last().parent
         {'category': 'fiction',
         'author': 'J. R. R. Tolkien',
         'title': 'The Lord of the Rings',
@@ -162,7 +162,7 @@ In the case we are concerned with, we could proceed as follows:
 
     df = pd.json_normalize(data, ["store", ["book"]])
 
-    >> df
+    df
             category            author                   title  price           isbn
         0  reference        Nigel Rees  Sayings of the Century   8.95            NaN
         1    fiction      Evelyn Waugh         Sword of Honour  12.99            NaN
@@ -170,13 +170,13 @@ In the case we are concerned with, we could proceed as follows:
         3    fiction  J. R. R. Tolkien   The Lord of the Rings  22.99  0-395-19395-8
 
     # filter books with no isbn
-    >> df.query("isbn.isna()")
+    df.query("isbn.isna()")
             category        author                   title  price isbn
         0  reference    Nigel Rees  Sayings of the Century   8.95  NaN
         1    fiction  Evelyn Waugh         Sword of Honour  12.99  NaN
 
     # filter books whose title contains the string "the" and has a valid ISBN
-    >> df.query("title.str.contains('the') & isbn.isna() == False")
+    df.query("title.str.contains('the') & isbn.isna() == False")
         category            author                  title  price           isbn
         3  fiction  J. R. R. Tolkien  The Lord of the Rings  22.99  0-395-19395-8
 
@@ -188,5 +188,9 @@ In the case we are concerned with, we could proceed as follows:
     data = js.JSONObject(data) # load the data into JSONNode instance
 
     # filter books with no isbn
-    >> data.store.book.annotate(isbn=None).query(isbn__isnull=True, include_parent_=True)
+    data.store.book.annotate(isbn=None).query(isbn__isnull=True, include_parent_=True)
         <QuerySet [{'category': 'reference', 'author': 'Nigel Rees', 'title': 'Sayings of the Century', 'price': 8.95, 'isbn': None}, {'category': 'fiction', 'author': 'Evelyn Waugh', 'title': 'Sword of Honour', 'price': 12.99, 'isbn': None}]>
+    
+    # filter books whose title contains the string "the" and has a valid ISBN
+    data.store.book.query(title__contains="the", isbn__isnull=False)
+        <QuerySet [{'category': 'fiction', 'author': 'J. R. R. Tolkien', 'title': 'The Lord of the Rings', 'isbn': '0-395-19395-8', 'price': 22.99}]>
