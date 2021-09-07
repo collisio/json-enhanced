@@ -66,7 +66,6 @@ def _parse_query(node, include_parent_, **q):
             # so we prepend __parent__c_<target_key> in the target_actions list
             target_actions = ["parent", f"c_{target_key}"] + target_actions
             target_key = target_keys[0]
-            include_parent_ = True
 
         # first of all, if target key of query argument does not match child's key, we won't append it to querylist
         if target_key != node._key:

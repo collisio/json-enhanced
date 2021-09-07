@@ -456,7 +456,9 @@ class JsonTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
+            self.test6.query(
+                text__regex=r"(?:2|5)", pos__0__gte=2, include_parent_=True
+            ),
             [
                 {"text": "dummy text 2", "pos": [3, 2]},
                 {"text": "dummy text 5", "pos": [4, 1]},
@@ -464,7 +466,7 @@ class JsonTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            test.query(data=1, date__gte=datetime(2021, 8, 1)),
+            test.query(data=1, date__gte=datetime(2021, 8, 1), include_parent_=True),
             [
                 {"data": 1, "date": "2021/08/01  12:00:00Z"},
                 {"data": 1, "date": "2021-08-02"},
@@ -486,7 +488,9 @@ class JsonTest(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            test.annotate(date=None).query(data__c_data__contains=1, date__isnull=True),
+            test.annotate(date=None).query(
+                data__c_data__contains=1, date__isnull=True, include_parent_=True
+            ),
             [{"data": {"data": 1, "date": "2021-08-02"}, "date": None}],
         )
 
