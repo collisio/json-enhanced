@@ -489,9 +489,9 @@ def _path(node, requested_value):
     # TODO add test
     if isinstance(requested_value, (list, tuple, set)):
         return all(i in node.jsonpath.keys for i in requested_value)
-    elif isinstance(requested_value, str):
+    elif isinstance(requested_value, (str, int)):
         return requested_value in node.jsonpath.keys
     else:
         raise TypeError(
-            f"Argument requested_value must be an iterable or str, not {type(requested_value)}"
+            f"Argument requested_value must be an iterable, str or bool, not {type(requested_value)}"
         )

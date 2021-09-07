@@ -78,6 +78,7 @@ class JSONPath:
         elif (index := kwargs.get("index")) is not None:
             self._string = str(index) + "/" + self._string
             self._path = f"[{index}]" + self._path
+            self._keys.append(index)
 
     def __eq__(self, other):
         return (self._string == other) or (self._path == other)
