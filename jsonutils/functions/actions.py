@@ -398,7 +398,12 @@ def _isnull(node, requested_value):
         raise JSONQueryException(
             f"Requested value must be a boolean, not {type(requested_value)}"
         )
-    return bool(node) != requested_value if node != 0 else False
+
+    boolean_value = (
+        True if isinstance(node, (JSONBool, JSONInt, JSONFloat)) else bool(node)
+    )
+
+    return boolean_value != requested_value
 
 
 def _length(node, requested_value):
@@ -453,8 +458,38 @@ def _type(node, requested_value):
             return True
         else:
             return False
+    elif isinstance(node, JSONDict):
+        if requested_value in (dict, "dict"):
+            return True
+        else:
+            return False
+    elif isinstance(node, JSONList):
+        if requested_value in (list, "list"):
+            return True
+        else:
+            return False
+    elif isinstance(node, JSONFloat):
+        if requested_value in (float, "float"):
+            return True
+        else:
+            return False
+    elif isinstance(node, JSONInt):
+        if requested_value in (int, "int"):
+            return True
+        else:
+            return False
+    elif isinstance(node, JSONStr):
+        if requested_value in (str, "str"):
+            return True
+        elif requested_value in (datetime, "datetime"):
+            if node.to_datetime(only_check=True):
+                return True
+            else:
+                return False
+        else:
+            return False
     else:
-        return isinstance(node, requested_value)
+        return False
 
 
 def _key(node, requested_value):

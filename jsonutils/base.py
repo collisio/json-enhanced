@@ -37,7 +37,7 @@ class JSONPath:
         obj = super().__new__(cls)
         obj._string = s  # pretty path
         obj._path = ""  # python json path
-        obj._keys = [] # list of dict keys
+        obj._keys = []  # list of dict keys
         return obj
 
     @property
@@ -278,7 +278,6 @@ class JSONNode:
         from jsonutils.functions.actions import _path
 
         return _path(self, other)
-
 
 
 class JSONCompose(JSONNode):
@@ -996,6 +995,12 @@ class JSONBool(JSONSingleton):
         except Exception:
             return False
 
+    def __ne__(self, other):
+        try:
+            return self._data != parse_bool(other)
+        except Exception:
+            return False
+
     def __gt__(self, other):
         return False
 
@@ -1026,6 +1031,12 @@ class JSONNull(JSONSingleton):
     def __eq__(self, other):
         try:
             return self._data == other
+        except Exception:
+            return False
+
+    def __ne__(self, other):
+        try:
+            return self._data != other
         except Exception:
             return False
 

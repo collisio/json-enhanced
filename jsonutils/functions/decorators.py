@@ -1,7 +1,5 @@
 from functools import wraps
 
-import jsonutils.config as config
-
 
 def catch_exceptions(func):
     """
@@ -10,11 +8,10 @@ def catch_exceptions(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if kwargs.get("fail_silently"):
+        if kwargs.get("fail_silently") is True:
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                print(f"Exception in function {func.__name__}. Error message: {e}")
                 return
         else:
             return func(*args, **kwargs)

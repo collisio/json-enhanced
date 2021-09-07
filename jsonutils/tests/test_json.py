@@ -338,12 +338,24 @@ class JsonTest(unittest.TestCase):
 
     def test_queries(self):
 
+        self.assertEqual(JSONObject(dict(A=True)).query(A__isnull=True), [])
+        self.assertEqual(JSONObject(dict(A=True)).query(A__isnull=False), [True])
+        self.assertEqual(JSONObject(dict(A=False)).query(A__isnull=True), [])
+        self.assertEqual(JSONObject(dict(A=False)).query(A__isnull=False), [False])
         self.assertEqual(self.test3.query(Bool="true"), [JSONBool(True)])
         self.assertEqual(self.test3.query(Bool__type=str), [])
+        self.assertEqual(self.test3.query(Bool__type="str"), [])
         self.assertEqual(self.test3.query(Bool__type=bool), [JSONBool(True)])
+        self.assertEqual(self.test3.query(Bool__type="bool"), [JSONBool(True)])
         self.assertEqual(self.test4.query(None__type=None), [JSONNull(None)])
+        self.assertEqual(self.test4.query(None__type="None"), [JSONNull(None)])
+        self.assertEqual(self.test5.query(Str__type="str"), ["string1", "string2"])
+        self.assertEqual(self.test5.query(Str__type="None"), [])
         self.assertEqual(self.test5.query(Str__length=7), ["string1", "string2"])
         self.assertEqual(self.test5.query(Str__length=0), [])
+        self.assertEqual(
+            self.test5.query(Datetime__type=datetime), self.test5.query(Datetime=All)
+        )
         self.assertRaises(JSONQueryException, lambda: self.test5.query(Str__length="1"))
         self.assertEqual(
             self.test3.query(List__contains=True), [[JSONBool(True), JSONBool(False)]]
