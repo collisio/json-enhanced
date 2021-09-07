@@ -23,6 +23,8 @@ def _parse_query(node, include_parent_, **q):
     from jsonutils.base import JSONNode
 
     class UniqueList(list):
+        """A list but appending only unique values"""
+
         def append(self, object):
             return super().append(object) if object not in self else None
 
@@ -60,6 +62,8 @@ def _parse_query(node, include_parent_, **q):
         target_keys.append(target_key)
 
         if len(target_keys) > 1:  # MULTIQUERY MODE
+            # in a multiquery mode, we take the outer dict which contains the first target key
+            # so we prepend __parent__c_<target_key> in the target_actions list
             target_actions = ["parent", f"c_{target_key}"] + target_actions
             target_key = target_keys[0]
             include_parent_ = True

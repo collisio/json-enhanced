@@ -455,3 +455,43 @@ def _type(node, requested_value):
             return False
     else:
         return isinstance(node, requested_value)
+
+
+def _key(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject comes from a given parent key
+    """
+    # TODO add test
+    if not isinstance(requested_value, str):
+        raise TypeError(
+            f"Argument requested_value must be an str instance, not {type(requested_value)}"
+        )
+    return node._key == requested_value
+
+
+def _index(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject comes from a given parent key
+    """
+    # TODO add test
+    if not isinstance(requested_value, int):
+        raise TypeError(
+            f"Argument requested_value must be an int instance, not {type(requested_value)}"
+        )
+    return node._index == requested_value
+
+
+def _path(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject comes from selected path
+    """
+    # TODO store jsonpath in cache to avoid call it repeatdly
+    # TODO add test
+    if isinstance(requested_value, (list, tuple, set)):
+        return all(i in node.jsonpath.keys for i in requested_value)
+    elif isinstance(requested_value, str):
+        return requested_value in node.jsonpath.keys
+    else:
+        raise TypeError(
+            f"Argument requested_value must be an iterable or str, not {type(requested_value)}"
+        )

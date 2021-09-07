@@ -208,12 +208,19 @@ class QuerySet(list):
         """
         Update elements of queryset within JSONObject from which they are derived (self._root)
         """
-        from jsonutils.base import JSONObject
 
-        # TODO allow for functions over the objects
+        # TODO add test for update when callables
+        is_callable = callable(new_obj)
+
         for item in self:
             path = item.jsonpath.relative_to(self._root)
-            exec(f"self._root{path} = new_obj")
+            if is_callable:
+                try:
+                    exec(f"self._root{path} = new_obj(self._root{path})")
+                except Exception:
+                    pass
+            else:
+                exec(f"self._root{path} = new_obj")
 
     def unique(self):
         """

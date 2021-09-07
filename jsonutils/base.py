@@ -37,6 +37,7 @@ class JSONPath:
         obj = super().__new__(cls)
         obj._string = s  # pretty path
         obj._path = ""  # python json path
+        obj._keys = [] # list of dict keys
         return obj
 
     @property
@@ -46,6 +47,10 @@ class JSONPath:
     @property
     def expr(self):
         return self._path
+
+    @property
+    def keys(self):
+        return list(reversed(self._keys))
 
     def relative_to(self, child):
         """Calculate jsonpath relative to child's jsonpath"""
@@ -69,6 +74,7 @@ class JSONPath:
         if (key := kwargs.get("key")) is not None:
             self._string = str(key) + "/" + self._string
             self._path = f'["{key}"]' + self._path
+            self._keys.append(key)
         elif (index := kwargs.get("index")) is not None:
             self._string = str(index) + "/" + self._string
             self._path = f"[{index}]" + self._path
@@ -256,6 +262,22 @@ class JSONNode:
         from jsonutils.functions.actions import _type
 
         return _type(self, other)
+
+    def key_action(self, other):
+        from jsonutils.functions.actions import _key
+
+        return _key(self, other)
+
+    def index_action(self, other):
+        from jsonutils.functions.actions import _index
+
+        return _index(self, other)
+
+    def path_action(self, other):
+        from jsonutils.functions.actions import _path
+
+        return _path(self, other)
+
 
 
 class JSONCompose(JSONNode):
