@@ -22,7 +22,7 @@ from jsonutils.functions.parsers import (
     parse_float,
     url_validator,
 )
-from jsonutils.query import QuerySet
+from jsonutils.query import ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict
 from jsonutils.utils.retry import retry_function
 
@@ -183,6 +183,19 @@ class JSONNode:
             path._update(key=parent._key, index=parent._index)
             parent = parent.parent
         return path
+
+    @property
+    def parent_list(self):
+        pl = ParentList()
+
+        parent = self
+        last = parent
+        while parent is not None:
+            last = parent
+            parent = parent.parent
+            pl.append(last)
+
+        return pl[1:]
 
     @property
     def root(self):

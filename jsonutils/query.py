@@ -182,6 +182,10 @@ class Q:
         return obj
 
 
+class ParentList(list):
+    pass
+
+
 class QuerySet(list):
     """
     This is a queryset object.

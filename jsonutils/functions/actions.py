@@ -443,6 +443,7 @@ def _type(node, requested_value):
         "int",
         "bool",
         "None",
+        "singleton",
     ):
         raise JSONQueryException(
             f"Requested value must be a valid type, not {requested_value}"
@@ -451,35 +452,49 @@ def _type(node, requested_value):
     if isinstance(node, JSONBool):
         if requested_value in (bool, "bool"):
             return True
+        elif requested_value == "singleton":
+            return True
         else:
             return False
     elif isinstance(node, JSONNull):
         if requested_value in (None, "None"):
+            return True
+        elif requested_value == "singleton":
             return True
         else:
             return False
     elif isinstance(node, JSONDict):
         if requested_value in (dict, "dict"):
             return True
+        elif requested_value == "singleton":
+            return False
         else:
             return False
     elif isinstance(node, JSONList):
         if requested_value in (list, "list"):
             return True
+        elif requested_value == "singleton":
+            return False
         else:
             return False
     elif isinstance(node, JSONFloat):
         if requested_value in (float, "float"):
+            return True
+        elif requested_value == "singleton":
             return True
         else:
             return False
     elif isinstance(node, JSONInt):
         if requested_value in (int, "int"):
             return True
+        elif requested_value == "singleton":
+            return True
         else:
             return False
     elif isinstance(node, JSONStr):
         if requested_value in (str, "str"):
+            return True
+        elif requested_value == "singleton":
             return True
         elif requested_value in (datetime, "datetime"):
             if node.to_datetime(only_check=True):
