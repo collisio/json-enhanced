@@ -297,6 +297,10 @@ class JSONCompose(JSONNode):
         self._child_objects = UUIDdict()
         self._assign_children()
 
+    @property
+    def _data(self):
+        return super().json_decode
+
     def _assign_children(self):
         """Any JSON object can be a child for a given compose object"""
         if isinstance(self, JSONDict):
@@ -348,7 +352,14 @@ class JSONCompose(JSONNode):
                 )
         return queryset
 
-    def get(self, recursive_=None, include_parent_=None, throw_exceptions_=None, **q):
+    def get(
+        self,
+        recursive_=None,
+        include_parent_=None,
+        throw_exceptions_=None,
+        native_types_=None,
+        **q,
+    ):
 
         # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
@@ -357,6 +368,8 @@ class JSONCompose(JSONNode):
             include_parent_ = config.include_parents
         if throw_exceptions_ is None:
             throw_exceptions_ = config.query_exceptions
+        if native_types_ is None:
+            native_types_ = config.native_types
         # ------------------------
         query = self.query(
             recursive_=recursive_,
@@ -376,7 +389,11 @@ class JSONCompose(JSONNode):
             else:
                 return query.first()
         else:
-            return query.first()
+            result = query.first(native_types_=False)
+            if native_types_:
+                return result._data
+            else:
+                return result
 
     def annotate(self, **kwargs):
         """
@@ -690,7 +707,7 @@ class JSONList(list, JSONCompose):
 class JSONStr(str, JSONSingleton):
     def __new__(cls, string):
         obj = super().__new__(cls, string)
-        obj._data = string
+        obj._data = str(string)
         return obj
 
     # converters
@@ -897,7 +914,7 @@ class JSONStr(str, JSONSingleton):
 class JSONFloat(float, JSONSingleton):
     def __new__(cls, fl):
         obj = super().__new__(cls, fl)
-        obj._data = fl
+        obj._data = float(fl)
         return obj
 
     def __hash__(self):
@@ -937,7 +954,7 @@ class JSONFloat(float, JSONSingleton):
 class JSONInt(int, JSONSingleton):
     def __new__(cls, i):
         obj = super().__new__(cls, i)
-        obj._data = i
+        obj._data = int(i)
         return obj
 
     def __hash__(self):

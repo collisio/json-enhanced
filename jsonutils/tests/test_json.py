@@ -1,8 +1,8 @@
 import json
-from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
 import unittest
 from datetime import datetime
 
+import jsonutils as js
 import pytz
 from jsonutils.base import (
     JSONBool,
@@ -19,11 +19,15 @@ from jsonutils.base import (
     JSONStr,
 )
 from jsonutils.encoders import JSONObjectEncoder
+from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
 from jsonutils.query import All, QuerySet, SingleQuery
 
 
 class JsonTest(unittest.TestCase):
     def setUp(self):
+        js.config.native_types = False
+        js.config.query_exceptions = True
+
         self.test1 = JSONObject(
             [
                 {"Float": 2.3, "Int": 1, "Str": "string"},

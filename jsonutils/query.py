@@ -2,6 +2,8 @@ import re
 from datetime import date, datetime
 from typing import Union
 
+import jsonutils.base as base
+import jsonutils.config as config
 from jsonutils.exceptions import JSONQueryException
 
 
@@ -62,9 +64,8 @@ class SingleQuery:
         Check this single query against a target node object.
         node argument must be an instance of JSONNode.
         """
-        from jsonutils.base import JSONNode
 
-        if not isinstance(node, JSONNode):
+        if not isinstance(node, base.JSONNode):
             raise JSONQueryException(
                 f"child argument must be JSONNode type, not {type(node)}"
             )
@@ -74,7 +75,7 @@ class SingleQuery:
 
         # grab a list of node actions, without the action suffix
         node_actions = [
-            i.replace("_action", "") for i in dir(JSONNode) if i.endswith("action")
+            i.replace("_action", "") for i in dir(base.JSONNode) if i.endswith("action")
         ]
         obj = node
 
@@ -192,11 +193,27 @@ class QuerySet(list):
         super().__init__(*args)
         self._root = None
 
-    def first(self):
-        return self.__getitem__(0) if self.__len__() > 0 else None
+    def first(self, native_types_=None):
+        # ---- DYNAMIC CONFIG ----
+        if native_types_ is None:
+            native_types_ = config.native_types
+        # ------------------------
+        result = self.__getitem__(0)
+        if not native_types_:
+            return result if self.__len__() > 0 else None
+        else:  # if native_types_ is selected
+            return result._data if self.__len__() > 0 else None
 
-    def last(self):
-        return self.__getitem__(-1) if self.__len__() > 0 else None
+    def last(self, native_types_=None):
+        # ---- DYNAMIC CONFIG ----
+        if native_types_ is None:
+            native_types_ = config.native_types
+        # ------------------------
+        result = self.__getitem__(-1)
+        if not native_types_:
+            return result if self.__len__() > 0 else None
+        else:  # if native_types_ is selected
+            return result._data if self.__len__() > 0 else None
 
     def exists(self):
         return True if self.__len__() > 0 else False
@@ -226,7 +243,6 @@ class QuerySet(list):
         """
         Returns unique values in a querylist
         """
-        from jsonutils.base import JSONSingleton
 
         # TODO add test for this
         # TODO dict option for counting unique values
