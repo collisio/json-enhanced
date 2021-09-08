@@ -530,3 +530,19 @@ def _path(node, requested_value):
         raise TypeError(
             f"Argument requested_value must be an iterable, str or bool, not {type(requested_value)}"
         )
+
+
+def _notpath(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject does not come from selected path
+    """
+    # TODO store jsonpath in cache to avoid call it repeatdly
+    # TODO add test
+    if isinstance(requested_value, (list, tuple, set)):
+        return not any(i in node.jsonpath.keys for i in requested_value)
+    elif isinstance(requested_value, (str, int)):
+        return requested_value not in node.jsonpath.keys
+    else:
+        raise TypeError(
+            f"Argument requested_value must be an iterable, str or bool, not {type(requested_value)}"
+        )

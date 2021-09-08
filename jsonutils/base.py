@@ -279,6 +279,11 @@ class JSONNode:
 
         return _path(self, other)
 
+    def notpath_action(self, other):
+        from jsonutils.functions.actions import _notpath
+
+        return _notpath(self, other)
+
 
 class JSONCompose(JSONNode):
     """
