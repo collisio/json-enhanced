@@ -8,7 +8,7 @@ import pytz
 from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 from jsonutils.functions.decorators import catch_exceptions
-from jsonutils.query import All, AllChoices
+from jsonutils.query import All, AllChoices, Year
 
 
 def _parse_query(node, include_parent_, **q):
@@ -33,54 +33,68 @@ def _parse_query(node, include_parent_, **q):
             return super().append(object) if object not in self else None
 
     def make_actions(obj, target_actions, query_value):
+        MODIFICATOR_CHECK = True
         actions_count = len(target_actions)
         for idx, action in enumerate(target_actions):
+            if MODIFICATOR_CHECK:
+                # ---- MODIFICATORS ----
+                # modify obj before apply actions
+                if action == "parent":
+                    obj = obj.parent
+                    if obj is None:
+                        return False
+                    if idx == actions_count - 1:
+                        action = "exact"  # if parent is last action, take exact as the default one
+                    else:
+                        continue  # continue to next action
+                elif action == "parents":  # multiparents modificator
+                    parents = obj.parent_list
+                    if not parents:
+                        return False
+                    if "parents" in target_actions[idx + 1 :]:
+                        raise JSONQueryException(
+                            "Lookup parents can only be included once"
+                        )
 
-            # ---- MODIFICATORS ----
-            # modify obj before apply actions
-            if action == "parent":
-                obj = obj.parent
-                if obj is None:
-                    return False
-                if idx == actions_count - 1:
-                    action = "exact"  # if parent is last action, take exact as the default one
-                else:
-                    continue  # continue to next action
-            elif action == "parents": # multiparents modificator
-                parents = obj.parent_list
-                if not parents:
-                    return False
-                if "parents" in target_actions[idx + 1 :]:
-                    raise JSONQueryException("Lookup parents can only be included once")
-
-                results = (
-                    make_actions(i, target_actions[idx + 1 :], query_value)
-                    for i in parents
-                )
-                if any(results):
-                    return True  # no more actions, continue with next query
-                else:
-                    return False
-            elif match := re.fullmatch(r"c_(\w+)", action):  # child modificator
-                try:
-                    obj = obj.__getitem__(match.group(1))
-                except Exception:
-                    return False
-                if idx == actions_count - 1:
-                    action = "exact"  # if child is last action, take exact as the default one
-                else:
-                    continue  # continue to next action
-            elif action.isdigit():
-                if not isinstance(obj, list):
-                    return False
-                try:
-                    obj = obj[int(action)]
-                except IndexError:
-                    return False
-                if idx == actions_count - 1:
-                    action = "exact"  # if digit is last action, take exact as the default one
-                else:
-                    continue  # continue to next action
+                    results = (
+                        make_actions(i, target_actions[idx + 1 :], query_value)
+                        for i in parents
+                    )
+                    if any(results):
+                        return True  # no more actions, continue with next query
+                    else:
+                        return False
+                elif match := re.fullmatch(r"c_(\w+)", action):  # child modificator
+                    try:
+                        obj = obj.__getitem__(match.group(1))
+                    except Exception:
+                        return False
+                    if idx == actions_count - 1:
+                        action = "exact"  # if child is last action, take exact as the default one
+                    else:
+                        continue  # continue to next action
+                elif action.isdigit():
+                    if not isinstance(obj, list):
+                        return False
+                    try:
+                        obj = obj[int(action)]
+                    except IndexError:
+                        return False
+                    if idx == actions_count - 1:
+                        action = "exact"  # if digit is last action, take exact as the default one
+                    else:
+                        continue  # continue to next action
+                elif action == "year": # TODO add test for year
+                    if len(target_actions[idx + 1 :]) > 1:
+                        raise JSONQueryException(
+                            f"After year lookup, cannot set more actions"
+                        )
+                    obj = Year(obj)
+                    if idx == actions_count - 1:
+                        action = "exact"  # if year is last action, take exact as the default one
+                    else:
+                        MODIFICATOR_CHECK = False
+                        continue  # continue to next action without cheking more modificators
             # ---- MATCH ----
             # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
             # no errors will be thrown, if types are not compatible, just returns False

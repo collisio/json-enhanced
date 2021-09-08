@@ -4,8 +4,8 @@ from typing import Union
 
 import jsonutils.base as base
 import jsonutils.config as config
-from jsonutils.exceptions import JSONQueryException
 import jsonutils.functions.parsers as parsers
+from jsonutils.exceptions import JSONQueryException
 
 
 class SingleQuery:
@@ -315,3 +315,32 @@ class All(metaclass=AllChoices):
     """
 
     pass
+
+
+class Year:
+    # TODO add more actions
+    def __init__(self, data):
+        self.data = parsers.parse_datetime(data, fail_silently=True)
+
+    def exact_action(self, query_value):
+        if query_value == All:
+            return True
+
+        if not isinstance(query_value, int):
+            raise JSONQueryException(
+                f"Argument query_value must be an int, not {type(query_value)}"
+            )
+        if self.data:
+            return self.data.year == query_value
+        else:
+            return False
+
+    def contains_action(self, query_value):
+        if not isinstance(query_value, int):
+            raise JSONQueryException(
+                f"Argument query_value must be an int, not {type(query_value)}"
+            )
+        if self.data:
+            return str(query_value) in str(self.data.year)
+        else:
+            return False
