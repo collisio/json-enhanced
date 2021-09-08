@@ -5,6 +5,7 @@ from typing import Union
 import jsonutils.base as base
 import jsonutils.config as config
 from jsonutils.exceptions import JSONQueryException
+import jsonutils.functions.parsers as parsers
 
 
 class SingleQuery:
@@ -261,6 +262,19 @@ class QuerySet(list):
             if item.query(**q).exists():
                 output.append(item)
         return output
+
+    # ---- GROUP OPERATIONS ----
+    def sum(self):
+        """Sum numbers on queryset"""
+
+        if not self.exists():
+            return
+
+        result = 0
+        for item in self:
+            number = parsers.parse_float(item, fail_silently=True) or 0
+            result += number
+        return result
 
     def __repr__(self):
         return "<QuerySet " + super().__repr__() + ">"
