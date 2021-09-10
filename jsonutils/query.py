@@ -293,16 +293,25 @@ class QuerySet(list):
         # TODO dict option for counting unique values
         unique_values = QuerySet()
         unique_values._root = self._root
-        for item in self:
-            obj = item
-            if transform is not None:
+
+        transformed_values = set()
+
+        if transform is None:
+            for item in self:
+                if item not in unique_values:
+                    unique_values.append(item)
+            return unique_values
+        else:
+            for item in self:
+                obj = item
                 try:
                     obj = transform(item)
                 except Exception:
                     pass
-            if obj not in unique_values:
-                unique_values.append(item)
-        return unique_values
+                if obj not in transformed_values:
+                    transformed_values.add(obj)
+                    unique_values.append(item)
+            return unique_values
 
     def filter(self, **q):
         # TODO add test
@@ -424,6 +433,6 @@ class ExtractYear:
                 f"Argument query_value must be an int, not {type(query_value)}"
             )
         if self.data:
-            return str(query_value) in str(self.data.year)
+            return str(query_value) in str(self.year)
         else:
             return False
