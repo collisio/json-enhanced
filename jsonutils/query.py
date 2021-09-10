@@ -281,17 +281,26 @@ class QuerySet(list):
             else:
                 exec(f"self._root{path} = new_obj")
 
-    def unique(self):
+    def unique(self, transform=None):
         """
         Returns unique values in a querylist
+        Arguments:
+        ---------
+            transform: if selected, then applies such a function on each item in the queryset before checking
         """
 
         # TODO add test for this
         # TODO dict option for counting unique values
         unique_values = QuerySet()
         unique_values._root = self._root
-        for idx, item in enumerate(self):
-            if item not in unique_values:
+        for item in self:
+            obj = item
+            if transform is not None:
+                try:
+                    obj = transform(item)
+                except Exception:
+                    pass
+            if obj not in unique_values:
                 unique_values.append(item)
         return unique_values
 
@@ -324,7 +333,7 @@ class QuerySet(list):
 
     def order_by(self, key):
         # TODO
-        rever = False if key.startswith("-") else True
+        rever = True if key.startswith("-") else False
 
         try:
             result = QuerySet(
@@ -392,7 +401,7 @@ class All(metaclass=AllChoices):
     pass
 
 
-class Year:
+class ExtractYear:
     # TODO add more actions
     def __init__(self, data):
         self.data = parsers.parse_datetime(data, fail_silently=True)
