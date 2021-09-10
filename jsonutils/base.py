@@ -541,6 +541,7 @@ class JSONDict(dict, JSONCompose):
 
     _DEFAULT = object()
     get = JSONCompose.get  # override get method
+    _get = dict.get # original get method
     values = JSONNode.values
 
     def __init__(self, *args, **kwargs):

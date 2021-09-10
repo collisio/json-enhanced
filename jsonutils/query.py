@@ -1,4 +1,5 @@
 import re
+import warnings
 from datetime import date, datetime
 from typing import Union
 
@@ -326,6 +327,26 @@ class QuerySet(list):
         values_list._root = self._root
         return values_list
 
+    def order_by(self, key):
+        # TODO
+        rever = False if key.startswith("-") else True
+
+        try:
+            result = QuerySet(
+                sorted(
+                    self,
+                    key=lambda x: x.parent._get(key.replace("-", "").strip(), ""),
+                    reverse=rever,
+                )
+            )
+        except Exception as e:
+            warnings.warn(f"QuerySet could not be sorted. Info: {e}")
+            # print(e)
+            return self
+
+        result._root = self._root
+        return result
+
     # ---- GROUP OPERATIONS ----
     def sum(self):
         """Sum numbers on queryset"""
@@ -380,6 +401,7 @@ class Year:
     # TODO add more actions
     def __init__(self, data):
         self.data = parsers.parse_datetime(data, fail_silently=True)
+        self.year = self.data.year if self.data else None
 
     def exact_action(self, query_value):
         if query_value == All:
@@ -389,10 +411,8 @@ class Year:
             raise JSONQueryException(
                 f"Argument query_value must be an int, not {type(query_value)}"
             )
-        if self.data:
-            return self.data.year == query_value
-        else:
-            return False
+
+        return self.year == query_value
 
     def contains_action(self, query_value):
         if not isinstance(query_value, int):
