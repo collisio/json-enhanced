@@ -300,7 +300,7 @@ class QuerySet(list):
         output = QuerySet()
         output._root = self._root
         for item in self:
-            if item.query(**q).exists():
+            if item.parent.query(**q).exists():
                 output.append(item)
         return output
 
