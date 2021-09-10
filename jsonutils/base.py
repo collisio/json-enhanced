@@ -23,7 +23,7 @@ from jsonutils.functions.parsers import (
     url_validator,
 )
 from jsonutils.query import ParentList, QuerySet
-from jsonutils.utils.dict import UUIDdict
+from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
 
 
@@ -207,6 +207,24 @@ class JSONNode:
             last = parent
             parent = parent.parent
         return last
+
+    def values(self, *keys, search_upwards=True):
+        output_dict = ValuesDict({k: None for k in keys})
+
+        for key in keys:
+            obj = self
+            while True:
+                if isinstance(obj, JSONDict):
+                    if key in obj:
+                        output_dict[key] = obj[key]._data
+                        break
+                if search_upwards:
+                    obj = obj.parent
+                    if obj is None:
+                        break
+                else:
+                    break
+        return output_dict
 
     def __str__(self):
         return self.json_encode(indent=4)
@@ -523,6 +541,7 @@ class JSONDict(dict, JSONCompose):
 
     _DEFAULT = object()
     get = JSONCompose.get  # override get method
+    values = JSONNode.values
 
     def __init__(self, *args, **kwargs):
 

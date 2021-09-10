@@ -186,6 +186,47 @@ class ParentList(list):
     pass
 
 
+class ValuesList(list):
+    """
+    Like a QuerySet, but only some methods.
+    Attributes:
+    ----------
+        _root: the root json object from which the entire queryset is derived
+    """
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self._root = None
+
+    def first(self):
+        result = self.__getitem__(0)
+        return result if self.__len__() > 0 else None
+
+    def last(self, native_types_=None):
+        result = self.__getitem__(-1)
+        return result if self.__len__() > 0 else None
+
+    def exists(self):
+        return True if self.__len__() > 0 else False
+
+    def count(self):
+        return self.__len__()
+
+    def unique(self):
+        """
+        Returns unique values
+        """
+
+        # TODO add test for this
+        # TODO dict option for counting unique values
+        unique_values = ValuesList()
+        unique_values._root = self._root
+        for idx, item in enumerate(self):
+            if item not in unique_values:
+                unique_values.append(item)
+        return unique_values
+
+
 class QuerySet(list):
     """
     This is a queryset object.
@@ -266,6 +307,24 @@ class QuerySet(list):
             if item.query(**q).exists():
                 output.append(item)
         return output
+
+    def values(self, *keys, search_upwards=True):
+        """
+        This method changes the values returned by the queryset.
+        The returned values will be python types.
+
+        Arguments
+        ---------
+            search_upwards: The function will try to search for the specified keys among the parents of each object
+
+        """
+        # TODO call node values method for each item
+
+        values_list = ValuesList(
+            (item.values(*keys, search_upwards=True) for item in self)
+        )
+        values_list._root = self._root
+        return values_list
 
     # ---- GROUP OPERATIONS ----
     def sum(self):

@@ -42,3 +42,15 @@ class TranslationDict(dict):
             return super().__getitem__(k)
         except KeyError:
             return k if self._default == self.Key else self._default
+
+
+class ValuesDict(dict):
+    """An usual dict object, but accessing keys by attribute"""
+
+    def __getattr__(self, name):
+
+        try:
+            return super().__getitem__(name)
+        except KeyError:
+            return
+
