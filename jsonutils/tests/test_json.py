@@ -347,6 +347,8 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(JSONObject(dict(A=True)).query(A__isnull=False), [True])
         self.assertEqual(JSONObject(dict(A=False)).query(A__isnull=True), [])
         self.assertEqual(JSONObject(dict(A=False)).query(A__isnull=False), [False])
+        self.assertEqual(self.test3.query(fakke="true").first(), JSONNull(None))
+        self.assertEqual(self.test3.query(fakke="true").last(), JSONNull(None))
         self.assertEqual(self.test3.query(Bool="true"), [JSONBool(True)])
         self.assertEqual(self.test3.query(Bool__type=str), [])
         self.assertEqual(self.test3.query(Bool__type="str"), [])

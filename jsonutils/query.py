@@ -243,15 +243,21 @@ class QuerySet(list):
 
     def first(self):
 
-        result = self.__getitem__(0)
+        try:
+            result = self.__getitem__(0)
+        except IndexError:
+            return
         if not self._native_types:
-            return result if self.__len__() > 0 else None
+            return result
         else:  # if native_types_ is selected
-            return result._data if self.__len__() > 0 else None
+            return result._data
 
     def last(self):
 
-        result = self.__getitem__(-1)
+        try:
+            result = self.__getitem__(-1)
+        except IndexError:
+            return
         if not self._native_types:
             return result if self.__len__() > 0 else None
         else:  # if native_types_ is selected
