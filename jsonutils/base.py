@@ -418,7 +418,7 @@ class JSONCompose(JSONNode):
             if throw_exceptions_:
                 raise JSONQueryException("The query has not returned any result")
             else:
-                return
+                return None if native_types_ else JSONNull(None)
         elif query.count() > 1:
             if throw_exceptions_:
                 raise JSONQueryMultipleValues("More than one value returned by query")

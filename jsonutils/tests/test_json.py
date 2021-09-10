@@ -802,7 +802,12 @@ class JsonTest(unittest.TestCase):
             "root/root_list/1/child/A/",
         )
         self.assertIsNone(
-            test.get(A__parents__0=0, A__parents__index=0, throw_exceptions_=False)
+            test.get(
+                A__parents__0=0,
+                A__parents__index=0,
+                throw_exceptions_=False,
+                native_types_=True,
+            )
         )
         self.assertRaisesRegex(
             JSONQueryException,
@@ -911,4 +916,11 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             test2.get(staff=True).values("timestamp", "age"),
             {"timestamp": None, "age": 31},
+        )
+        self.assertEqual(
+            test2.get(fake=True).values("timestamp", "age"),
+            {"timestamp": None, "age": None},
+        )
+        self.assertIsNone(
+            test2.get(fake=True).values("timestamp", "age").timestamp,
         )
