@@ -239,25 +239,20 @@ class QuerySet(list):
     def __init__(self, *args):
         super().__init__(*args)
         self._root = None
+        self._native_types = None
 
-    def first(self, native_types_=None):
-        # ---- DYNAMIC CONFIG ----
-        if native_types_ is None:
-            native_types_ = config.native_types
-        # ------------------------
+    def first(self):
+
         result = self.__getitem__(0)
-        if not native_types_:
+        if not self._native_types:
             return result if self.__len__() > 0 else None
         else:  # if native_types_ is selected
             return result._data if self.__len__() > 0 else None
 
-    def last(self, native_types_=None):
-        # ---- DYNAMIC CONFIG ----
-        if native_types_ is None:
-            native_types_ = config.native_types
-        # ------------------------
+    def last(self):
+
         result = self.__getitem__(-1)
-        if not native_types_:
+        if not self._native_types:
             return result if self.__len__() > 0 else None
         else:  # if native_types_ is selected
             return result._data if self.__len__() > 0 else None

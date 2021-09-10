@@ -353,7 +353,14 @@ class JSONCompose(JSONNode):
                 child.parent = self
                 self.__setitem__(index, child)
 
-    def query(self, recursive_=None, include_parent_=None, stop_at_match_=None, **q):
+    def query(
+        self,
+        recursive_=None,
+        include_parent_=None,
+        stop_at_match_=None,
+        native_types_=None,
+        **q,
+    ):
         if not isinstance(stop_at_match_, (int, type(None))):
             raise TypeError(
                 f"Argument stop_at_match_ must be an integer or NoneType, not {type(stop_at_match_)}"
@@ -366,8 +373,12 @@ class JSONCompose(JSONNode):
             recursive_ = config.recursive_queries
         if include_parent_ is None:
             include_parent_ = config.include_parents
+        if native_types_ is None:
+            native_types_ = config.native_types
         # ------------------------
         queryset = QuerySet()
+        if native_types_:
+            queryset._native_types = True
         queryset._root = self  # the node which sends the query
         children = self._child_objects.values()
         for child in children:
@@ -384,6 +395,7 @@ class JSONCompose(JSONNode):
                     recursive_=recursive_,
                     include_parent_=include_parent_,
                     stop_at_match_=stop_at_match_,
+                    native_types_=native_types_,
                     **q,
                 )
         return queryset
@@ -411,6 +423,7 @@ class JSONCompose(JSONNode):
             recursive_=recursive_,
             include_parent_=include_parent_,
             stop_at_match_=2,
+            native_types_=native_types_,
             **q,
         )
 
@@ -425,11 +438,7 @@ class JSONCompose(JSONNode):
             else:
                 return query.first()
         else:
-            result = query.first(native_types_=False)
-            if native_types_:
-                return result._data
-            else:
-                return result
+            return query.first()
 
     def annotate(self, **kwargs):
         """
@@ -541,7 +550,7 @@ class JSONDict(dict, JSONCompose):
 
     _DEFAULT = object()
     get = JSONCompose.get  # override get method
-    _get = dict.get # original get method
+    _get = dict.get  # original get method
     values = JSONNode.values
 
     def __init__(self, *args, **kwargs):
