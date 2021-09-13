@@ -20,7 +20,7 @@ from jsonutils.base import (
 )
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
-from jsonutils.query import All, QuerySet, SingleQuery
+from jsonutils.query import All, ExtractYear, QuerySet, SingleQuery
 
 
 class JsonTest(unittest.TestCase):
@@ -903,6 +903,18 @@ class JsonTest(unittest.TestCase):
             {"date": "2021-01-01", "name": "NAME"},
         )
         self.assertEqual(
+            test.get(field1=1, field1__parents__c_type="C").values(
+                datetime="date", new_name="name"
+            ),
+            {"datetime": "2021-01-01", "new_name": "NAME"},
+        )
+        self.assertEqual(
+            test.get(field1=1, field1__parents__c_type="C").values(
+                "date", new_name="name"
+            ),
+            {"date": "2021-01-01", "new_name": "NAME"},
+        )
+        self.assertEqual(
             test.get(
                 field1__parents__c_date__year=2022, field1__notpath="filing"
             ).values("date", "type", "id"),
@@ -925,4 +937,13 @@ class JsonTest(unittest.TestCase):
         )
         self.assertIsNone(
             test2.get(fake=True).values("timestamp", "age").timestamp,
+        )
+
+    def test_distinct(self):
+
+        self.assertEqual(
+            self.test6.query(timestamp__year=2021)
+            .order_by("-timestamp")
+            .distinct(lambda x: ExtractYear(x).year),
+            ["2021-05-05 18:00:25"],
         )

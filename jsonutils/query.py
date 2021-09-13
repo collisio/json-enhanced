@@ -213,7 +213,7 @@ class ValuesList(list):
     def count(self):
         return self.__len__()
 
-    def unique(self):
+    def distinct(self):
         """
         Returns unique values
         """
@@ -287,7 +287,7 @@ class QuerySet(list):
             else:
                 exec(f"self._root{path} = new_obj")
 
-    def unique(self, transform=None):
+    def distinct(self, transform=None):
         """
         Returns unique values in a querylist
         Arguments:

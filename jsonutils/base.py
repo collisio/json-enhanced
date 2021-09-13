@@ -210,7 +210,10 @@ class JSONNode:
 
     def values(self, *keys, search_upwards=True, **kwargs):
         # TODO add test when kwargs is set
-        output_dict = ValuesDict({k: None for k in keys} | {k:None for k in kwargs})
+        output_dict = ValuesDict({k: None for k in keys})
+
+        if kwargs:
+            output_dict.update(kwargs)
 
         for key in keys:
             obj = self
