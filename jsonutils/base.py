@@ -208,8 +208,9 @@ class JSONNode:
             parent = parent.parent
         return last
 
-    def values(self, *keys, search_upwards=True):
-        output_dict = ValuesDict({k: None for k in keys})
+    def values(self, *keys, search_upwards=True, **kwargs):
+        # TODO add test when kwargs is set
+        output_dict = ValuesDict({k: None for k in keys} | {k:None for k in kwargs})
 
         for key in keys:
             obj = self
@@ -224,6 +225,22 @@ class JSONNode:
                         break
                 else:
                     break
+
+        if kwargs:
+            for k, v in kwargs.items():
+                obj = self
+                while True:
+                    if isinstance(obj, JSONDict):
+                        if v in obj:
+                            output_dict[k] = obj[v]._data
+                            break
+                    if search_upwards:
+                        obj = obj.parent
+                        if obj is None:
+                            break
+                    else:
+                        break
+
         return output_dict
 
     def __str__(self):
