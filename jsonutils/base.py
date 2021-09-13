@@ -128,6 +128,7 @@ class JSONObject:
         Open an external JSON file.
         If a valid url string is passed, then it will try to make a get request to such a target and decode a json file
         """
+        file = str(file)
         if url_validator(file):
             req = retry_function(requests.get, file, raise_exception=False)
             try:
@@ -209,11 +210,10 @@ class JSONNode:
         return last
 
     def values(self, *keys, search_upwards=True, **kwargs):
-        # TODO add test when kwargs is set
         output_dict = ValuesDict({k: None for k in keys})
 
         if kwargs:
-            output_dict.update(kwargs)
+            output_dict.update({k: None for k in kwargs})
 
         for key in keys:
             obj = self

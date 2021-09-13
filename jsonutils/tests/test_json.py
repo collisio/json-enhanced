@@ -1,6 +1,7 @@
 import json
 import unittest
 from datetime import datetime
+from pathlib import Path
 
 import jsonutils as js
 import pytz
@@ -21,6 +22,8 @@ from jsonutils.base import (
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
 from jsonutils.query import All, ExtractYear, QuerySet, SingleQuery
+
+BASE_PATH = Path(js.__file__).parent.resolve()
 
 
 class JsonTest(unittest.TestCase):
@@ -343,6 +346,8 @@ class JsonTest(unittest.TestCase):
 
     def test_queries(self):
 
+        test = JSONObject.open(BASE_PATH / "tests/balance-sheet-example-test.json")
+
         self.assertEqual(JSONObject(dict(A=True)).query(A__isnull=True), [])
         self.assertEqual(JSONObject(dict(A=True)).query(A__isnull=False), [True])
         self.assertEqual(JSONObject(dict(A=False)).query(A__isnull=True), [])
@@ -458,6 +463,15 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test8.query(none__isnull=True), QuerySet([None]))
         self.assertEqual(self.test8.query(id__isnull=True), QuerySet())
         self.assertEqual(self.test6.query(data__1=True), QuerySet([[False, True]]))
+
+        self.assertListEqual(
+            test.query(
+                filing_date__isnull=False, filing_date__notpath="all_company_filings"
+            )
+            .order_by("-filing_date")
+            .values(date="filing_date", form_type="form_type", url="form_url"),
+            [{"date": "2017-09-27", "form_type": "1-A/A", "url": None}, {"date": "2017-09-06", "form_type": "1-A", "url": None}],
+        )
 
     def test_multiqueries(self):
         test = JSONObject(
