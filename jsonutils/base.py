@@ -22,7 +22,7 @@ from jsonutils.functions.parsers import (
     parse_float,
     url_validator,
 )
-from jsonutils.query import ParentList, QuerySet
+from jsonutils.query import All, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
 
@@ -217,6 +217,14 @@ class JSONNode:
 
         for key in keys:
             obj = self
+            if "__" in key:  # traverse by childs in this case
+                child_key = key.split("__")[-1]
+                if not child_key:
+                    raise ValueError("Wrong syntax within query values request")
+                output_dict[key] = obj.parent.get(
+                    **{child_key: All}, native_types_=True, throw_exceptions_=False
+                )
+                continue
             while True:
                 if isinstance(obj, JSONDict):
                     if key in obj:
@@ -232,6 +240,14 @@ class JSONNode:
         if kwargs:
             for k, v in kwargs.items():
                 obj = self
+                if "__" in v:  # traverse by childs in this case
+                    child_key = v.split("__")[-1]
+                    if not child_key:
+                        raise ValueError("Wrong syntax within query values request")
+                    output_dict[k] = obj.parent.get(
+                        **{child_key: All}, native_types_=True, throw_exceptions_=False
+                    )
+                    continue
                 while True:
                     if isinstance(obj, JSONDict):
                         if v in obj:
@@ -557,10 +573,10 @@ class JSONSingleton(JSONNode):
 
     is_composed = False
 
-    def query(self, recursive_=None, include_parent_=None, stop_at_match_=None, **q):
+    def query(self, **kwargs):
         return QuerySet()
 
-    def get(self, recursive_=None, include_parent_=None, throw_exceptions_=None, **q):
+    def get(self, **kwargs):
         return
 
 
