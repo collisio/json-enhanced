@@ -200,12 +200,17 @@ class ValuesList(list):
         self._root = None
 
     def first(self):
-        result = self.__getitem__(0)
-        return result if self.__len__() > 0 else None
 
-    def last(self, native_types_=None):
-        result = self.__getitem__(-1)
-        return result if self.__len__() > 0 else None
+        try:
+            return self.__getitem__(0)
+        except IndexError:
+            return
+
+    def last(self):
+        try:
+            return self.__getitem__(-1)
+        except IndexError:
+            return
 
     def exists(self):
         return True if self.__len__() > 0 else False
@@ -271,7 +276,7 @@ class QuerySet(list):
 
     def update(self, new_obj):
         """
-        Update elements of queryset within JSONObject from which they are derived (self._root)
+        Update elements of queryset (inplace) within JSONObject from which they are derived (self._root)
         """
 
         # TODO add test for update when callables
@@ -299,6 +304,7 @@ class QuerySet(list):
         # TODO dict option for counting unique values
         unique_values = QuerySet()
         unique_values._root = self._root
+        unique_values._native_types = self._native_types
 
         transformed_values = set()
 
@@ -323,6 +329,8 @@ class QuerySet(list):
         # TODO add test
         output = QuerySet()
         output._root = self._root
+        output._native_types = self._native_types
+
         for item in self:
             if item.parent.query(**q).exists():
                 output.append(item)
@@ -364,6 +372,7 @@ class QuerySet(list):
             return self
 
         result._root = self._root
+        result._native_types = self._native_types
         return result
 
     # ---- GROUP OPERATIONS ----
