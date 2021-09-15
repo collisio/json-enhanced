@@ -9,7 +9,7 @@ import pytz
 from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 from jsonutils.functions.decorators import catch_exceptions
-from jsonutils.query import All, AllChoices, ExtractYear
+from jsonutils.query import All, AllChoices, ExtractYear, I
 
 
 def _parse_query(node, include_parent_, **q):
@@ -166,6 +166,8 @@ def _parse_query_key(node, pattern, include_parent_, **q):
 
     if isinstance(pattern, str):
         pattern = re.compile(pattern)
+    elif isinstance(pattern, I):
+        pattern = pattern.data
     elif isinstance(pattern, re.Pattern):
         pass
     else:

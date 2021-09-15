@@ -23,7 +23,7 @@ from jsonutils.functions.parsers import (
     parse_float,
     url_validator,
 )
-from jsonutils.query import All, ParentList, QuerySet
+from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
 
@@ -574,7 +574,7 @@ class JSONCompose(JSONNode):
         if native_types_ is None:
             native_types_ = config.native_types
         # ------------------------
-        queryset = QuerySet()
+        queryset = KeyQuerySet()
         if native_types_:
             queryset._native_types = True
         queryset._root = self  # the node which sends the query
