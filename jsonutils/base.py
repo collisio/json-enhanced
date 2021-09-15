@@ -863,6 +863,17 @@ class JSONStr(str, JSONSingleton):
 
         return parse_datetime(self, **kwargs)
 
+    def to_timestamp(self, **kwargs):
+        """Try to parse a POSIX timestamp string from self string"""
+
+        datetime_ = parse_datetime(self, **kwargs)
+        try:
+            result = datetime_.timestamp() * 1000
+        except Exception:
+            return
+        else:
+            return result
+
     def to_bool(self):
         """Trye to parse a bool object from self string."""
 
