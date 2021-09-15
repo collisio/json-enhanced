@@ -94,6 +94,15 @@ class JSONObject:
     This class does not contain any instances of.
     """
 
+    _RESERVED_ATTRIBUTES = (
+        "_key",
+        "_index",
+        "parent",
+        "_id",
+        "_child_objects",
+        "_is_annotation",
+    )
+
     def __new__(cls, data=None, raise_exception=False):
         if not isinstance(raise_exception, bool):
             raise TypeError(
@@ -157,6 +166,8 @@ class JSONNode:
         parent: last parent object where this object comes from
         _id: unique uuid4 hex identifier of object
     """
+
+    __odir__ = object.__dir__  # rename old __dir__ method to __odir__
 
     def __init__(self, *args, **kwargs):
 
@@ -603,7 +614,7 @@ class JSONCompose(JSONNode):
 
         if isinstance(self, JSONDict):
             for key, value in list(self.items()):
-                if hasattr(value, "_is_annotation"):
+                if "_is_annotation" in value.__odir__():
                     self.pop(key)
                 if value.is_composed and recursive:
                     value._remove_annotations()
@@ -647,7 +658,7 @@ class JSONDict(dict, JSONCompose):
     def __dir__(self):
         # for autocompletion stuff
         if config.autocomplete_only_nodes:
-            return self.keys()
+            return list(self.keys())
         else:
             return list(self.keys()) + super().__dir__()
 
@@ -655,7 +666,7 @@ class JSONDict(dict, JSONCompose):
         try:
             return self.__getitem__(name)
         except KeyError:  # if a key error is thrown, then it will call __dir__
-            raise AttributeError
+            return
 
     def __setitem__(self, k, v):
         """
@@ -687,16 +698,7 @@ class JSONDict(dict, JSONCompose):
     def __setattr__(self, name, value):
         """To define behaviour when setting an atributte. It must register a new node if not a reserved keyword"""
 
-        RESERVED_ATTRIBUTES = (
-            "_key",
-            "_index",
-            "parent",
-            "_id",
-            "_child_objects",
-            "_is_annotation",
-        )
-
-        if name in RESERVED_ATTRIBUTES:
+        if name in JSONObject._RESERVED_ATTRIBUTES:
             return super().__setattr__(name, value)
         else:
             return self.__setitem__(name, value)
@@ -778,7 +780,7 @@ class JSONList(list, JSONCompose):
     def __setattr__(self, name, value):
         """To define behaviour when setting an atributte. It must register a new node if not a reserved keyword"""
 
-        if name in ("_key", "_index", "parent", "_id", "_child_objects"):
+        if name in JSONObject._RESERVED_ATTRIBUTES:
             return super().__setattr__(name, value)
         else:
             name = int(name.replace("_", ""))

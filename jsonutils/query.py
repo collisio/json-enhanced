@@ -7,6 +7,7 @@ import jsonutils.base as base
 import jsonutils.config as config
 import jsonutils.functions.parsers as parsers
 from jsonutils.exceptions import JSONQueryException
+from jsonutils.utils.dict import ValuesDict
 
 
 class SingleQuery:
@@ -355,6 +356,12 @@ class QuerySet(list):
             )
         )
         values_list._root = self._root
+        if not values_list:
+            output_dict = ValuesDict({k: None for k in keys})
+
+            if kwargs:
+                output_dict.update({k: None for k in kwargs})
+            values_list.append(output_dict)
         return values_list
 
     def order_by(self, key):
