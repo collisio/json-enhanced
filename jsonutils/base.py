@@ -21,6 +21,7 @@ from jsonutils.functions.parsers import (
     parse_bool,
     parse_datetime,
     parse_float,
+    parse_timestamp,
     url_validator,
 )
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
@@ -868,13 +869,7 @@ class JSONStr(str, JSONSingleton):
     def to_timestamp(self, **kwargs):
         """Try to parse a POSIX timestamp string from self string"""
 
-        datetime_ = parse_datetime(self, **kwargs)
-        try:
-            result = datetime_.timestamp() * 1000
-        except Exception:
-            return
-        else:
-            return result
+        return parse_timestamp(self, **kwargs)
 
     def to_bool(self):
         """Trye to parse a bool object from self string."""

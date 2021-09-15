@@ -440,6 +440,12 @@ def parse_datetime(
 
 
 @catch_exceptions
+def parse_timestamp(s, **kwargs):
+    result = int(parse_datetime(s, **kwargs).timestamp() * 1000)
+    return result
+
+
+@catch_exceptions
 def parse_bool(s, fail_silently=False):
     from jsonutils.base import JSONBool
 
