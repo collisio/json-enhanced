@@ -4,6 +4,7 @@ import ast
 import re
 from datetime import date, datetime
 
+import jsonutils.base as base
 import pytz
 from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
@@ -19,11 +20,10 @@ def _parse_query(node, include_parent_, **q):
     Query q must be structured as follows:
         <key>__<modificator>__<query>
     """
-    from jsonutils.base import JSONNode
 
     # grab a list of node actions, without the action suffix
     node_actions = [
-        i.replace("_action", "") for i in dir(JSONNode) if i.endswith("action")
+        i.replace("_action", "") for i in dir(base.JSONNode) if i.endswith("action")
     ]
 
     class UniqueList(list):
@@ -46,7 +46,7 @@ def _parse_query(node, include_parent_, **q):
                     if idx == actions_count - 1:
                         action = "exact"  # if parent is last action, take exact as the default one
                     else:
-                        continue  # continue to next action
+                        continue  # continue to next action or modificator
                 elif action == "parents":  # multiparents modificator
                     parents = obj.parent_list
                     if not parents:
@@ -72,7 +72,7 @@ def _parse_query(node, include_parent_, **q):
                     if idx == actions_count - 1:
                         action = "exact"  # if child is last action, take exact as the default one
                     else:
-                        continue  # continue to next action
+                        continue  # continue to next action or modificator
                 elif action.isdigit():
                     if not isinstance(obj, list):
                         return False
@@ -83,8 +83,8 @@ def _parse_query(node, include_parent_, **q):
                     if idx == actions_count - 1:
                         action = "exact"  # if digit is last action, take exact as the default one
                     else:
-                        continue  # continue to next action
-                elif action == "year": # TODO add test for year
+                        continue  # continue to next action or modificator
+                elif action == "year":  # TODO add test for year
                     if len(target_actions[idx + 1 :]) > 1:
                         raise JSONQueryException(
                             f"After year lookup, cannot set more actions"
@@ -148,6 +148,142 @@ def _parse_query(node, include_parent_, **q):
 
         # first of all, if target key of query argument does not match child's key, we won't append it to querylist
         if target_key != node._key:
+            return False, None
+
+        obj = node
+
+        result = make_actions(obj, target_actions, query_value)
+        if result is False:
+            return False, None
+    return (True, node.parent if include_parent_ else node)
+
+
+def _parse_query_key(node, pattern, include_parent_, **q):
+    """ """
+    # --- first checks ----
+    if not node._key:
+        return False, None
+
+    if isinstance(pattern, str):
+        pattern = re.compile(pattern)
+    elif isinstance(pattern, re.Pattern):
+        pass
+    else:
+        raise TypeError(f"Argument pattern must be an string or regex pattern")
+
+    if not q:
+        raise JSONQueryException(f"Actions are mandatory")
+
+    # --------------------
+
+    # grab a list of node actions, without the action suffix
+    node_actions = [
+        i.replace("_action", "") for i in dir(base.JSONNode) if i.endswith("action")
+    ]
+
+    def make_actions(obj, target_actions, query_value):
+        MODIFICATOR_CHECK = True
+        actions_count = len(target_actions)
+        for idx, action in enumerate(target_actions):
+            if MODIFICATOR_CHECK:
+                # ---- MODIFICATORS ----
+                # modify obj before apply actions
+                if action == "parent":
+                    obj = obj.parent
+                    if obj is None:
+                        return False
+                    if idx == actions_count - 1:
+                        action = "exact"  # if parent is last action, take exact as the default one
+                    else:
+                        continue  # continue to next action or modificator
+                elif action == "parents":  # multiparents modificator
+                    parents = obj.parent_list
+                    if not parents:
+                        return False
+                    if "parents" in target_actions[idx + 1 :]:
+                        raise JSONQueryException(
+                            "Lookup parents can only be included once"
+                        )
+
+                    results = (
+                        make_actions(i, target_actions[idx + 1 :], query_value)
+                        for i in parents
+                    )
+                    if any(results):
+                        return True  # no more actions, continue with next query
+                    else:
+                        return False
+                elif match := re.fullmatch(r"c_(\w+)", action):  # child modificator
+                    try:
+                        obj = obj.__getitem__(match.group(1))
+                    except Exception:
+                        return False
+                    if idx == actions_count - 1:
+                        action = "exact"  # if child is last action, take exact as the default one
+                    else:
+                        continue  # continue to next action or modificator
+                elif action.isdigit():
+                    if not isinstance(obj, list):
+                        return False
+                    try:
+                        obj = obj[int(action)]
+                    except IndexError:
+                        return False
+                    if idx == actions_count - 1:
+                        action = "exact"  # if digit is last action, take exact as the default one
+                    else:
+                        continue  # continue to next action or modificator
+                elif action == "year":  # TODO add test for year
+                    if len(target_actions[idx + 1 :]) > 1:
+                        raise JSONQueryException(
+                            f"After year lookup, cannot set more actions"
+                        )
+                    obj = ExtractYear(obj)
+                    if idx == actions_count - 1:
+                        action = "exact"  # if year is last action, take exact as the default one
+                    else:
+                        MODIFICATOR_CHECK = False
+                        continue  # continue to next action without cheking more modificators
+            # ---- MATCH ----
+            # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
+            # no errors will be thrown, if types are not compatible, just returns False
+            # node actions can't interfer with modificators
+            if action in node_actions:  # call corresponding node method
+                result = getattr(obj, action + "_action")(query_value)
+                if not result:
+                    return False
+            else:
+                raise JSONQueryException(f"Bad query: {action}")
+        return True
+
+    for query_key, query_value in q.items():
+        if not isinstance(
+            query_value,
+            (
+                type,
+                float,
+                int,
+                str,
+                type(None),
+                bool,
+                dict,
+                list,
+                tuple,
+                date,
+                datetime,
+                AllChoices,
+            ),
+        ):
+            raise JSONQueryException(
+                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, date, datetime, allchoices"
+            )
+        target_actions = [i for i in query_key.split("__") if i]
+
+        if not target_actions:
+            raise JSONQueryException("Bad query. Missing actions")
+
+        # first of all, if target key of query argument does not match child's key, we won't append it to querylist
+        if not pattern.fullmatch(node._key):
             return False, None
 
         obj = node

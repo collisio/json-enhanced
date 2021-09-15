@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 from datetime import datetime
 from pathlib import Path
@@ -470,7 +471,10 @@ class JsonTest(unittest.TestCase):
             )
             .order_by("-filing_date")
             .values(date="filing_date", form_type="form_type", url="form_url"),
-            [{"date": "2017-09-27", "form_type": "1-A/A", "url": None}, {"date": "2017-09-06", "form_type": "1-A", "url": None}],
+            [
+                {"date": "2017-09-27", "form_type": "1-A/A", "url": None},
+                {"date": "2017-09-06", "form_type": "1-A", "url": None},
+            ],
         )
 
     def test_multiqueries(self):
@@ -960,4 +964,44 @@ class JsonTest(unittest.TestCase):
             .order_by("-timestamp")
             .distinct(lambda x: ExtractYear(x).year),
             ["2021-05-05 18:00:25"],
+        )
+
+    def test_query_keys(self):
+
+        test = JSONObject({"name": {"NAME": "Dan", "name": True}})
+
+        self.assertListEqual(
+            test.query_key(".*ame", exact=All), [{"NAME": "Dan", "name": True}, True]
+        )
+        self.assertListEqual(
+            test.query_key(re.compile(".*AmE", re.I), exact=All),
+            [{"NAME": "Dan", "name": True}, "Dan", True],
+        )
+        self.assertListEqual(
+            test.query_key(re.compile(".*AmE", re.I), type__=bool),
+            QuerySet([True]),
+        )
+        self.assertListEqual(
+            test.query_key(
+                re.compile(".*AmE", re.I),
+                type__=bool,
+                parent={"NAME": "Dan", "name": True},
+            ),
+            QuerySet([True]),
+        )
+        self.assertListEqual(
+            test.query_key(
+                re.compile(".*AmE", re.I),
+                type__=bool,
+                parent__key="name",
+            ),
+            QuerySet([True]),
+        )
+        self.assertListEqual(
+            test.query_key(
+                re.compile(".*AmE", re.I),
+                type__=bool,
+                path="fake",
+            ),
+            QuerySet([]),
         )

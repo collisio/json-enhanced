@@ -17,6 +17,7 @@ from jsonutils.exceptions import (
 )
 from jsonutils.functions.parsers import (
     _parse_query,
+    _parse_query_key,
     parse_bool,
     parse_datetime,
     parse_float,
@@ -548,6 +549,55 @@ class JSONCompose(JSONNode):
                 if ch.is_composed:
                     ch.annotate(**kwargs)
         return self
+
+    def query_key(
+        self,
+        pattern,
+        recursive_=None,
+        include_parent_=None,
+        stop_at_match_=None,
+        native_types_=None,
+        **q,
+    ):
+        if not isinstance(stop_at_match_, (int, type(None))):
+            raise TypeError(
+                f"Argument stop_at_match_ must be an integer or NoneType, not {type(stop_at_match_)}"
+            )
+
+        # within a particular parent node, each child in _child_objects registry must have a unique key
+
+        # ---- DYNAMIC CONFIG ----
+        if recursive_ is None:
+            recursive_ = config.recursive_queries
+        if include_parent_ is None:
+            include_parent_ = config.include_parents
+        if native_types_ is None:
+            native_types_ = config.native_types
+        # ------------------------
+        queryset = QuerySet()
+        if native_types_:
+            queryset._native_types = True
+        queryset._root = self  # the node which sends the query
+        children = self._child_objects.values()
+        for child in children:
+            # if child satisfies query request, it will be appended to the queryset object
+            check, obj = _parse_query_key(child, pattern, include_parent_, **q)
+            if check:
+                queryset.append(obj)
+                if stop_at_match_ and queryset.count() >= stop_at_match_:
+                    return queryset
+
+            # if child is also a compose object, it will send the same query to its children recursively
+            if child.is_composed and recursive_:
+                queryset += child.query_key(
+                    pattern,
+                    recursive_=recursive_,
+                    include_parent_=include_parent_,
+                    stop_at_match_=stop_at_match_,
+                    native_types_=native_types_,
+                    **q,
+                )
+        return queryset
 
     def _remove_annotations(self, recursive=True):
 
