@@ -22,7 +22,7 @@ from jsonutils.base import (
 )
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
-from jsonutils.query import All, ExtractYear, QuerySet, SingleQuery
+from jsonutils.query import All, ExtractYear, QuerySet, SingleQuery, ValuesList
 
 BASE_PATH = Path(js.__file__).parent.resolve()
 
@@ -971,6 +971,11 @@ class JsonTest(unittest.TestCase):
         test = JSONObject({"name": {"NAME": "Dan", "name": True}})
 
         self.assertListEqual(
+            test.query_key(js.I(".*na.*")).distinct(lambda x: x._key).keys(),
+            ValuesList(["name", "NAME"]),
+        )
+
+        self.assertListEqual(
             test.query_key(".*ame", exact=All), [{"NAME": "Dan", "name": True}, True]
         )
         self.assertListEqual(
@@ -983,7 +988,7 @@ class JsonTest(unittest.TestCase):
         )
         self.assertListEqual(
             test.query_key(
-                re.compile(".*AmE", re.I),
+                js.I(".*AmE"),
                 type__=bool,
                 parent={"NAME": "Dan", "name": True},
             ),

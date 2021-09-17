@@ -300,10 +300,11 @@ class QuerySet(list):
         ---------
             transform: if selected, then applies such a function on each item in the queryset before checking
         """
+        cls = self.__class__
 
         # TODO add test for this
         # TODO dict option for counting unique values
-        unique_values = QuerySet()
+        unique_values = cls()
         unique_values._root = self._root
         unique_values._native_types = self._native_types
 
@@ -328,7 +329,10 @@ class QuerySet(list):
 
     def filter(self, **q):
         # TODO add test
-        output = QuerySet()
+
+        cls = self.__class__
+
+        output = cls()
         output._root = self._root
         output._native_types = self._native_types
 
@@ -368,8 +372,10 @@ class QuerySet(list):
         # TODO
         rever = True if key.startswith("-") else False
 
+        cls = self.__class__
+
         try:
-            result = QuerySet(
+            result = cls(
                 sorted(
                     self,
                     key=lambda x: x.parent._get(key.replace("-", "").strip(), ""),
@@ -399,12 +405,13 @@ class QuerySet(list):
         return result
 
     def __repr__(self):
-        return "<QuerySet " + super().__repr__() + ">"
+        clsname = self.__class__.__name__
+        return f"<{clsname} " + super().__repr__() + ">"
 
 
 class KeyQuerySet(QuerySet):
     """
-    This is a QuerySet but with more methods for querying keys
+    This is a QuerySet, with all its methods, but adding more useful ones for querying keys.
     """
 
     def keys(self):

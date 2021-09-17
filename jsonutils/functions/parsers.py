@@ -174,7 +174,7 @@ def _parse_query_key(node, pattern, include_parent_, **q):
         raise TypeError(f"Argument pattern must be an string or regex pattern")
 
     if not q:
-        raise JSONQueryException(f"Actions are mandatory")
+        q = {"exact": All}
 
     # --------------------
 
@@ -293,6 +293,7 @@ def _parse_query_key(node, pattern, include_parent_, **q):
         result = make_actions(obj, target_actions, query_value)
         if result is False:
             return False, None
+
     return (True, node.parent if include_parent_ else node)
 
 
@@ -481,7 +482,7 @@ def parse_http_url(url, fail_silently=False):
             return "http://" + url
         elif protocol not in ("http", "https"):
             raise Exception(f"Url's protocol is not http: {protocol}")
-        else: # a protocol already exists
+        else:  # a protocol already exists
             return url
 
     else:
