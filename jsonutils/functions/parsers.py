@@ -466,19 +466,44 @@ def parse_json(s):
     pass
 
 
-def url_validator(url, public=False):
+@catch_exceptions
+def parse_http_url(url, fail_silently=False):
+
+    if not isinstance(url, str):
+        raise TypeError(f"Argument url must be an str instance, not {type(url)}")
+
+    match = url_validator(url, return_match=True, optative_protocol=True)
+
+    if match:
+        protocol = match.groupdict().get("protocol")
+
+        if not protocol:
+            return "http://" + url
+        elif protocol not in ("http", "https"):
+            raise Exception(f"Url's protocol is not http: {protocol}")
+        else: # a protocol already exists
+            return url
+
+    else:
+        raise Exception(f"Can't parse a valid url: {url}")
+
+
+def url_validator(url, public=False, return_match=False, optative_protocol=False):
     """
     :param value: URL address string to validate
     :param public: (default=False) Set True to only allow a public IP address
+    :param return_match: (default=False) Set True to return match instead of bool
     """
 
     ip_middle_octet = r"(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5]))"
     ip_last_octet = r"(?:\.(?:0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5]))"
 
+    prot = "?" if optative_protocol else ""
+
     regex = re.compile(  # noqa: W605
         r"^"
         # protocol identifier
-        r"(?:(?:https?|ftp)://)"
+        rf"(?:(?P<protocol>https?|ftp)://){prot}"
         # user:pass authentication
         r"(?:[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:]+"
         r"(?::[-a-z0-9._~%!$&'()*+,;=:]*)?@)?"
@@ -559,6 +584,10 @@ def url_validator(url, public=False):
     pattern = re.compile(regex)
 
     result = pattern.match(url)
+
+    if return_match:
+        return result
+
     if not public:
         return bool(result)
 
