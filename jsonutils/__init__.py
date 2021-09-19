@@ -8,4 +8,14 @@ from jsonutils.functions.parsers import (
 )
 from jsonutils.query import All, I, Q
 
+_JSON_TYPES = (
+    dict,
+    list,
+    str,
+    float,
+    int,
+    bool,
+    type(None),
+)
+
 from .release import __version__

@@ -32,7 +32,7 @@ JSONDict -----> list/tuple
 import re
 from datetime import date, datetime
 
-import pytz
+from jsonutils import _JSON_TYPES
 from jsonutils.base import (
     JSONBool,
     JSONCompose,
@@ -444,6 +444,7 @@ def _type(node, requested_value):
         "bool",
         "None",
         "singleton",
+        "number",
     ):
         raise JSONQueryException(
             f"Requested value must be a valid type, not {requested_value}"
@@ -478,14 +479,14 @@ def _type(node, requested_value):
         else:
             return False
     elif isinstance(node, JSONFloat):
-        if requested_value in (float, "float"):
+        if requested_value in (float, "float", "number"):
             return True
         elif requested_value == "singleton":
             return True
         else:
             return False
     elif isinstance(node, JSONInt):
-        if requested_value in (int, "int"):
+        if requested_value in (int, "int", "number"):
             return True
         elif requested_value == "singleton":
             return True
@@ -498,6 +499,11 @@ def _type(node, requested_value):
             return True
         elif requested_value in (datetime, "datetime"):
             if node.to_datetime(only_check=True):
+                return True
+            else:
+                return False
+        elif requested_value == "number":
+            if node.to_float(only_check=True):
                 return True
             else:
                 return False

@@ -164,6 +164,8 @@ def _parse_query_key(node, pattern, include_parent_, **q):
     if not node._key:
         return False, None
 
+    if pattern == "*":
+        pattern = ".*"
     if isinstance(pattern, str):
         pattern = re.compile(pattern)
     elif isinstance(pattern, I):
@@ -300,6 +302,7 @@ def _parse_query_key(node, pattern, include_parent_, **q):
 @catch_exceptions
 def parse_float(
     s,
+    only_check=False,
     decimal_sep=decimal_separator,
     thousands_sep=thousands_separator,
     fail_silently=False,
@@ -310,15 +313,22 @@ def parse_float(
     if isinstance(s, bool):
         raise JSONSingletonException("s argument cannot be boolean type")
     try:
-        return float(s)
+        result = float(s)
     except Exception:
-        pass
-
+        if only_check:
+            return False
+    else:
+        if only_check:
+            return True
+        else:
+            return result
     match = re.fullmatch(
         fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*\w{{,10}}\s*",
         s,
     )
     if not match:
+        if only_check:
+            return False
         raise JSONSingletonException(
             f"Target string does not match a float number: {s}"
         )

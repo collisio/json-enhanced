@@ -179,6 +179,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test1[2]["fake"].jsonpath, JSONPath("2/fake/"))
 
         self.assertTrue(test1.query(fake=True).exists())
+        self.assertEqual(test1.query_key(".*ak.*").keys().first(), "fake")
 
     def test_list_set_items(self):
 
@@ -225,9 +226,16 @@ class JsonTest(unittest.TestCase):
         )
 
     def test_keys(self):
+        """
+        Check that all nodes coming directly from dictionary keys have their corresponding key associated with them.
+        """
 
+        # Nodes coming from a list do not have an associated key, but an "index" attribute.
         self.assertEqual(self.test1[0]._key, None)
         self.assertEqual(self.test1[1]._key, None)
+        self.assertEqual(self.test1[0]._index, 0)
+        self.assertEqual(self.test1[1]._index, 1)
+        # --------------------------------------------------------------------------------
         self.assertEqual(self.test1[0]["Float"]._key, "Float")
         self.assertEqual(self.test1[0]["Int"]._key, "Int")
         self.assertEqual(self.test1[0]["Str"]._key, "Str")
@@ -238,7 +246,10 @@ class JsonTest(unittest.TestCase):
     def test_parents(self):
         """Check every child object has the right parent object"""
 
+        # the parent of the root node must be None
         self.assertEqual(self.test1.parent, None)
+
+        # the parent of both two list elements must be the list itself
         self.assertEqual(
             self.test1[0].parent,
             JSONList(
@@ -257,6 +268,7 @@ class JsonTest(unittest.TestCase):
                 ]
             ),
         )
+        # -----------------------------------------
         self.assertEqual(
             self.test1[0]["Float"].parent,
             JSONDict({"Float": 2.3, "Int": 1, "Str": "string"}),
@@ -289,6 +301,9 @@ class JsonTest(unittest.TestCase):
         )
 
     def test_root(self):
+        """
+        Verify that any child nodes within the json structure share the same unique root
+        """
         self.assertEqual(self.test6.position_data._0.root, self.test6)
         self.assertEqual(self.test6.position_data._1.root, self.test6)
         self.assertEqual(self.test6.root, self.test6)
@@ -349,10 +364,12 @@ class JsonTest(unittest.TestCase):
 
         test = JSONObject.open(BASE_PATH / "tests/balance-sheet-example-test.json")
 
+        # check isnull query
         self.assertEqual(JSONObject(dict(A=True)).query(A__isnull=True), [])
         self.assertEqual(JSONObject(dict(A=True)).query(A__isnull=False), [True])
         self.assertEqual(JSONObject(dict(A=False)).query(A__isnull=True), [])
         self.assertEqual(JSONObject(dict(A=False)).query(A__isnull=False), [False])
+        # ------------------
         self.assertEqual(self.test3.query(fakke="true").first(), JSONNull(None))
         self.assertEqual(self.test3.query(fakke="true").last(), JSONNull(None))
         self.assertEqual(self.test3.query(Bool="true"), [JSONBool(True)])
@@ -535,28 +552,7 @@ class JsonTest(unittest.TestCase):
         )
 
     def test_queries_traversing(self):
-        # {
-        #     "position_data": [
-        #         {"text": "dummy text 1", "pos": [1, 2]},
-        #         {"text": "dummy text 2", "pos": [3, 2]},
-        #         {"text": "dummy text 3", "pos": [1, 4]},
-        #         {"text": "dummy text 4", "pos": [2, 5]},
-        #         {"text": "dummy text 5", "pos": [4, 1]},
-        #         {"text": "dummy text 6", "pos": [1, 1, 5]},
-        #     ],
-        #     "timestamp_data": [
-        #         {"value": 523687, "timestamp": "2021-05-01 08:00:00"},
-        #         {"value": 523689, "timestamp": "2021-05-01 09:00:00"},
-        #         {"value": 523787, "timestamp": "2021-05-02 08:30:00"},
-        #         {"value": 525687, "timestamp": "2021-05-05 18:00:25"},
-        #     ],
-        # "boolean_data": [
-        #     {"data": [True, 1]},
-        #     {"data": [False, None]},
-        #     {"data": [0, 1]},
-        #     {"data": (False, True)},
-        # ],
-        # }
+
         test = self.test6
 
         self.assertListEqual(
@@ -681,12 +677,20 @@ class JsonTest(unittest.TestCase):
         )
         test6 = self.test6.copy()
 
-        test6.query(data__0=True).update("OK")
-        test.data.team.query(name__contains="e").update("Veronica")
+        self.assertEqual(test6.query(data__0=True).update("OK"), (1, 0))
+        self.assertEqual(
+            test.data.team.query(name__contains="e").update("Veronica"), (1, 0)
+        )
 
         self.assertEqual(test.data.team.query(name__contains="e"), ["Veronica"])
         self.assertEqual(test6.query(data__0=True), [])
         self.assertEqual(test6.query(data="OK"), ["OK"])
+        self.assertEqual(
+            test6.query(pos__2__gt=3, text__contains=6).update(lambda x: x[:2]), (1, 0)
+        )
+        self.assertEqual(test6.position_data._5.pos, [1, 1])
+        self.assertEqual(test6.position_data.query(pos__2=All), [])
+        self.assertEqual(test6.position_data.query(pos=(1, 1)), [[1, 1]])
 
     def test_all_queries(self):
         test = JSONObject({"A": {"A": 1, "B": 2}, "B": ["A", {"A": 2}]})
