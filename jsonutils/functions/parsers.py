@@ -3,13 +3,16 @@
 import ast
 import re
 from datetime import date, datetime
+from json import JSONDecoder
 
 import jsonutils.base as base
 import pytz
+import requests
 from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 from jsonutils.functions.decorators import catch_exceptions
-from jsonutils.query import All, AllChoices, ExtractYear, I
+from jsonutils.query import All, AllChoices, ExtractYear, I, QuerySet, ValuesList
+from jsonutils.utils.retry import retry_function
 
 
 def _parse_query(node, include_parent_, **q):
@@ -473,8 +476,41 @@ def parse_bool(s, fail_silently=False):
 
 
 def parse_json(s):
-    # TODO parse jsons in a string
-    pass
+    """Parse all jsons from a text string or URL"""
+
+    if not isinstance(s, str):
+        raise TypeError(f"Argument s must be a string, not {type(s)}")
+    output = QuerySet(list_of_root_nodes=True)
+
+    if url_validator(s):
+        req = retry_function(requests.get, s)
+        s = req.text
+
+    def extract_json_objects(text, decoder=JSONDecoder()):
+        """Find JSON objects in text, and yield the decoded JSON data
+
+        Does not attempt to look for JSON arrays, text, or other JSON types outside
+        of a parent JSON object.
+
+        """
+        pos = 0
+        while True:
+            match = (text.find("{", pos) + 1) or (text.find("[", pos) + 1)
+            if not match:
+                break
+            try:
+                result, index = decoder.raw_decode(text[match - 1 :])
+                yield result
+                pos = match + index
+            except ValueError:
+                pos = match + 1
+
+    for item in extract_json_objects(s):
+        if item:
+            data = base.JSONObject(item)
+            output.append(data)
+
+    return output
 
 
 @catch_exceptions

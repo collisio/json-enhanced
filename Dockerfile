@@ -30,7 +30,7 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     JSONUnknown', \
     'from jsonutils.query import I, SingleQuery, All, ExtractYear', \
     'from jsonutils.functions.parsers import parse_float, \
-    parse_datetime, parse_bool, url_validator', \
+    parse_datetime, parse_bool, parse_json, url_validator', \
     'from jsonutils.functions.dummy import dummy_json', \
     'from datetime import date, datetime', \
     'import pytz', \

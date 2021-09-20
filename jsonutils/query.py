@@ -240,12 +240,14 @@ class QuerySet(list):
     Attributes:
     ----------
         _root: the root json object from which the entire queryset is derived
+        _list_of_root_nodes: if this is a list of root nodes, coming from a parsed json instead of from a query
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args, list_of_root_nodes=False):
         super().__init__(*args)
         self._root = None
         self._native_types = None
+        self._list_of_root_nodes = list_of_root_nodes
 
     def first(self):
 
@@ -279,6 +281,8 @@ class QuerySet(list):
         """
         Update elements of queryset (inplace) within JSONObject from which they are derived (self._root)
         """
+        if self._list_of_root_nodes:
+            return  # TODO if list of root nodes, call each node's query
 
         # TODO add test for update when callables
         is_callable = callable(new_obj)
@@ -344,10 +348,16 @@ class QuerySet(list):
         output._root = self._root
         output._native_types = self._native_types
 
-        for item in self:
-            if item.parent.query(**q).exists():
-                output.append(item)
-        return output
+        if self._list_of_root_nodes:
+            for item in self:
+                if item.query(**q).exists():
+                    output.append(item)
+            return output
+        else:
+            for item in self:
+                if item.parent.query(**q).exists():
+                    output.append(item)
+            return output
 
     def values(self, *keys, search_upwards=True, **kwargs):
         """
@@ -359,7 +369,9 @@ class QuerySet(list):
             search_upwards: The function will try to search for the specified keys among the parents of each object
 
         """
-        # TODO call node values method for each item
+
+        if self._list_of_root_nodes:
+            return
 
         values_list = ValuesList(
             (
@@ -378,6 +390,8 @@ class QuerySet(list):
 
     def order_by(self, key):
         # TODO
+        if self._list_of_root_nodes:
+            return
         rever = True if key.startswith("-") else False
 
         cls = self.__class__
@@ -402,6 +416,9 @@ class QuerySet(list):
     # ---- GROUP OPERATIONS ----
     def sum(self):
         """Sum numbers on queryset"""
+
+        if self._list_of_root_nodes:
+            return
 
         if not self.exists():
             return
