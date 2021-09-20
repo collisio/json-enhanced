@@ -43,6 +43,7 @@ from jsonutils.base import (
     JSONNull,
     JSONSingleton,
     JSONStr,
+    JSONUnknown,
 )
 from jsonutils.exceptions import JSONQueryException
 from jsonutils.functions.parsers import parse_datetime, parse_float
@@ -445,6 +446,7 @@ def _type(node, requested_value):
         "None",
         "singleton",
         "number",
+        "unknown",
     ):
         raise JSONQueryException(
             f"Requested value must be a valid type, not {requested_value}"
@@ -507,6 +509,11 @@ def _type(node, requested_value):
                 return True
             else:
                 return False
+        else:
+            return False
+    elif isinstance(node, JSONUnknown):
+        if requested_value == "unknown":
+            return True
         else:
             return False
     else:

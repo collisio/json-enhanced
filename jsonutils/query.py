@@ -388,6 +388,16 @@ class QuerySet(list):
             values_list.append(output_dict)
         return values_list
 
+    def jsonpaths(self):
+
+        output = ValuesList()
+        output._root = self._root
+
+        for item in self:
+            output.append(item.jsonpath)
+
+        return output
+
     def order_by(self, key):
         # TODO
         if self._list_of_root_nodes:
