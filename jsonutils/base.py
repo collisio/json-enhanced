@@ -394,17 +394,11 @@ class JSONCompose(JSONNode):
         """Any JSON object can be a child for a given compose object"""
         if isinstance(self, JSONDict):
             for key, value in self.items():
-                child = JSONObject(value)
-                child._key = key
-                child.parent = self
-                self.__setitem__(key, child)
+                self.__setitem__(key, value)
 
         elif isinstance(self, JSONList):
             for index, item in enumerate(self):
-                child = JSONObject(item)
-                child._index = index
-                child.parent = self
-                self.__setitem__(index, child)
+                self.__setitem__(index, item)
 
     def query(
         self,

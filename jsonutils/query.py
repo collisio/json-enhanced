@@ -277,6 +277,20 @@ class QuerySet(list):
     def count(self):
         return self.__len__()
 
+    def delete(self):
+        if self._list_of_root_nodes:
+            return
+        deleted_objects = 0
+        for item in self:
+            path = item.parent.jsonpath.relative_to(self._root)
+            try:
+                exec(f"self._root{path}.pop(item._key)")
+            except Exception:
+                continue
+            else:
+                deleted_objects += 1
+        return deleted_objects
+
     def update(self, new_obj):
         """
         Update elements of queryset (inplace) within JSONObject from which they are derived (self._root)
@@ -358,6 +372,28 @@ class QuerySet(list):
         else:
             for item in self:
                 if item.parent.query(**q).exists():
+                    output.append(item)
+            return output
+
+    def filter_key(self, pattern, **q):
+        # TODO add test
+
+        cls = self.__class__
+
+        output = cls()
+        output._root = self._root
+        output._native_types = self._native_types
+
+        if (
+            self._list_of_root_nodes
+        ):  # If we are dealing with a list of root nodes, we must call the query function of each of them
+            for item in self:
+                if item.query_key(pattern, **q).exists():
+                    output.append(item)
+            return output
+        else:
+            for item in self:
+                if item.parent.query_key(pattern, **q).exists():
                     output.append(item)
             return output
 

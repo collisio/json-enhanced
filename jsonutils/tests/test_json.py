@@ -978,6 +978,23 @@ class JsonTest(unittest.TestCase):
             ["2021-05-05 18:00:25"],
         )
 
+    def test_delete(self):
+        test = JSONObject(
+            [
+                {
+                    "data": [{"name": "Dan", "age": 30}, {"name": "Hel", "age": 31}],
+                    "date": datetime(2021, 1, 1),
+                },
+                {"data": {"name": "Fel", "age": "27"}},
+            ]
+        )
+
+        self.assertEqual(test.query(date__year=2021).delete(), 1)
+        self.assertEqual(test.query(date__year=2021), [])
+        self.assertEqual(test.query(data=All).delete(), 2)
+        self.assertEqual(test.query(data=All), [])
+        self.assertEqual(test, [{}, {}])
+
     def test_query_keys(self):
 
         test = JSONObject({"name": {"NAME": "Dan", "name": True}})
