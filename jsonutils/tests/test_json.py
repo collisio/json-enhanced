@@ -19,6 +19,7 @@ from jsonutils.base import (
     JSONPath,
     JSONSingleton,
     JSONStr,
+    JSONUnknown,
 )
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
@@ -114,8 +115,15 @@ class JsonTest(unittest.TestCase):
 
     def test_unknown_types(self):
         test = JSONObject({"data": {"datetime": datetime(2021, 1, 1, 0, 0, 0)}})
+        test2 = JSONObject({"data": object})
 
         self.assertEqual(test.data.datetime, JSONStr("2021-01-01T00:00:00"))
+        self.assertTrue(test.check_valid_types())
+        self.assertIsInstance(test2.data, JSONUnknown)
+        self.assertEqual(
+            test2.check_valid_types(),
+            (False, [{"data": {"path": "data/", "type": type}}]),
+        )
 
     def test_types(self):
         """Assert all child types are the correct ones"""

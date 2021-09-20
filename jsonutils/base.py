@@ -1,8 +1,7 @@
 # This module contains the base objects needed
-import ast
 import json
 import os
-import re
+import sys
 from datetime import date, datetime
 from uuid import uuid4
 
@@ -27,6 +26,11 @@ from jsonutils.functions.parsers import (
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
+
+try:
+    DjangoQuerySet = sys.modules["django"].db.models.QuerySet
+except Exception:
+    DjangoQuerySet = type(None)
 
 
 class JSONPath:
@@ -111,14 +115,14 @@ class JSONObject:
             )
         if isinstance(data, JSONNode):
             return data
+        elif isinstance(data, type(None)):
+            return JSONNull(data)
         elif isinstance(data, dict):
             return JSONDict(data)
-        elif isinstance(data, (list, tuple)):
+        elif isinstance(data, (list, tuple, DjangoQuerySet)):
             return JSONList(data)
         elif isinstance(data, bool):
             return JSONBool(data)
-        elif isinstance(data, type(None)):
-            return JSONNull(data)
         elif isinstance(data, str):
             return JSONStr(data)
         elif isinstance(data, (date, datetime)):
@@ -624,6 +628,21 @@ class JSONCompose(JSONNode):
             for item in self:
                 if item.is_composed and recursive:
                     item._remove_annotations()
+
+    def check_valid_types(self):
+        """Check if json object has valid types (not unknown types)"""
+
+        queryset = self.query_key("*", type__="unknown")
+        if queryset.exists():
+            errors = [
+                {
+                    item._key: {"path": item.jsonpath.data, "type": item._type}
+                    for item in queryset
+                }
+            ]
+            return False, errors
+        else:
+            return True, None
 
 
 class JSONSingleton(JSONNode):
@@ -1214,4 +1233,7 @@ class JSONNull(JSONSingleton):
 class JSONUnknown(JSONSingleton):
     """Unknown object"""
 
-    pass
+    def __init__(self, data):
+        super().__init__()
+        self._data = data
+        self._type = type(data)
