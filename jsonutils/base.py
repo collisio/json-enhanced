@@ -247,7 +247,9 @@ class JSONNode:
                     if key in obj:
                         output_dict[key] = obj[key]._data
                         break
-                if search_upwards:
+                if (
+                    search_upwards
+                ):  # TODO search_upwards can be a number (number of recursive upwards lookings)
                     obj = obj.parent
                     if obj is None:
                         break
@@ -367,6 +369,16 @@ class JSONNode:
         from jsonutils.functions.actions import _notpath
 
         return _notpath(self, other)
+
+    def startswith_action(self, other):
+        from jsonutils.functions.actions import _startswith
+
+        return _startswith(self, other)
+
+    def endswith_action(self, other):
+        from jsonutils.functions.actions import _endswith
+
+        return _endswith(self, other)
 
 
 class JSONCompose(JSONNode):

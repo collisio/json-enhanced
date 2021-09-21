@@ -561,6 +561,10 @@ class ExtractYear:
         else:
             return False
 
+class Length:
+    def __init__(self, data):
+        self.data = data
+
 
 class I:
     """Ignore case Object wrapper, for using in query_key method instead of re.compile the pattern with re.I flag"""

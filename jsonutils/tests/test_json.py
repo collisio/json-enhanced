@@ -391,6 +391,21 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test5.query(Str__type="None"), [])
         self.assertEqual(self.test5.query(Str__length=7), ["string1", "string2"])
         self.assertEqual(self.test5.query(Str__length=0), [])
+        self.assertEqual(self.test5.query(Str__startswith="st"), ["string1", "string2"])
+        self.assertEqual(self.test5.query(Str__startswith="fake"), [])
+        self.assertEqual(self.test5.query(Str__endswith=1), ["string1"])
+        self.assertEqual(self.test5.query(Str__endswith=2), ["string2"])
+        self.assertEqual(self.test5.query(Str__endswith=3), [])
+        self.assertEqual(self.test5.query(Str__endswith=(1, 2)), ["string1", "string2"])
+        self.assertEqual(
+            self.test5.query(Str__endswith=(1, "2")), ["string1", "string2"]
+        )
+        self.assertEqual(
+            self.test5.query(Str__endswith=["1", 2]), ["string1", "string2"]
+        )
+        self.assertEqual(
+            self.test5.query(Str__endswith=["1", "2"]), ["string1", "string2"]
+        )
         self.assertEqual(
             self.test5.query(Str__type="singleton"), ["string1", "string2"]
         )

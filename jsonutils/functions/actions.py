@@ -574,3 +574,83 @@ def _notpath(node, requested_value):
         raise TypeError(
             f"Argument requested_value must be an iterable, str or bool, not {type(requested_value)}"
         )
+
+
+def _startswith(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject starts with target requested_value
+    """
+
+    if not isinstance(requested_value, (str, int, list, tuple)):
+        raise TypeError(
+            f"Argument requested_value must be an str, int or iterable instance, not {type(requested_value)}"
+        )
+
+    if isinstance(node, JSONStr):
+        if isinstance(requested_value, (str, int)):
+            return node.startswith(str(requested_value))
+        elif isinstance(requested_value, (list, tuple)):
+            try:
+                requested_value = tuple(
+                    (str(i) for i in requested_value if i is not None)
+                )
+            except Exception:
+                return False
+            return node.startswith(requested_value)
+        else:
+            return False
+    elif isinstance(node, (JSONInt, JSONFloat)):
+        if isinstance(requested_value, (str, int)):
+            return str(node).startswith(str(requested_value))
+        elif isinstance(requested_value, (list, tuple)):
+            try:
+                requested_value = tuple(
+                    (str(i) for i in requested_value if i is not None)
+                )
+            except Exception:
+                return False
+            return str(node).startswith(requested_value)
+        else:
+            return False
+    else:
+        return False
+
+
+def _endswith(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject starts with target requested_value
+    """
+
+    if not isinstance(requested_value, (str, int, list, tuple)):
+        raise TypeError(
+            f"Argument requested_value must be an str, int or iterable instance, not {type(requested_value)}"
+        )
+
+    if isinstance(node, JSONStr):
+        if isinstance(requested_value, (str, int)):
+            return node.endswith(str(requested_value))
+        elif isinstance(requested_value, (list, tuple)):
+            try:
+                requested_value = tuple(
+                    (str(i) for i in requested_value if i is not None)
+                )
+            except Exception:
+                return False
+            return node.endswith(requested_value)
+        else:
+            return False
+    elif isinstance(node, (JSONInt, JSONFloat)):
+        if isinstance(requested_value, (str, int)):
+            return str(node).endswith(str(requested_value))
+        elif isinstance(requested_value, (list, tuple)):
+            try:
+                requested_value = tuple(
+                    (str(i) for i in requested_value if i is not None)
+                )
+            except Exception:
+                return False
+            return str(node).endswith(requested_value)
+        else:
+            return False
+    else:
+        return False
