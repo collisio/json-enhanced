@@ -89,6 +89,10 @@ class JsonTest(unittest.TestCase):
             JSONStr(" 2021-01-04").to_datetime(), datetime(2021, 1, 4, tzinfo=pytz.utc)
         )
         self.assertEqual(
+            JSONStr(" 2021-01-04").to_datetime(return_string=True),
+            datetime(2021, 1, 4, tzinfo=pytz.utc).isoformat(),
+        )
+        self.assertEqual(
             JSONStr(" 2021-01-04 09:00:00.001+01:00").to_datetime(),
             datetime.strptime(
                 "2021-01-04T09:00:00.001+01:00", "%Y-%m-%dT%H:%M:%S.001%z"
@@ -126,6 +130,10 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             JSONStr(" 01/02/2021T 09.00.30.0054Z ").to_datetime(),
             datetime(2021, 2, 1, 9, 0, 30, tzinfo=pytz.utc),
+        )
+        self.assertIsNone(JSONStr("fake_datetime").to_datetime(fail_silently=True))
+        self.assertIsNone(
+            JSONStr("fake_datetime").to_datetime(return_string=True, fail_silently=True)
         )
         self.assertRaisesRegex(
             JSONSingletonException,
@@ -235,12 +243,30 @@ class JsonTest(unittest.TestCase):
             datetime(2021, 1, 1, tzinfo=pytz.utc),
         )
         self.assertEqual(
+            parse_datetime(
+                date(2021, 1, 1), tzone_aware=True, only_date=False, return_string=True
+            ),
+            datetime(2021, 1, 1, tzinfo=pytz.utc).isoformat(),
+        )
+        self.assertEqual(
             parse_datetime(date(2021, 1, 1), tzone_aware=True, only_date=True),
             datetime(2021, 1, 1, tzinfo=pytz.utc),
         )
         self.assertEqual(
+            parse_datetime(
+                date(2021, 1, 1), tzone_aware=True, only_date=True, return_string=True
+            ),
+            datetime(2021, 1, 1, tzinfo=pytz.utc).isoformat(),
+        )
+        self.assertEqual(
             parse_datetime(date(2021, 1, 1), tzone_aware=False, only_date=True),
             datetime(2021, 1, 1),
+        )
+        self.assertEqual(
+            parse_datetime(
+                date(2021, 1, 1), tzone_aware=False, only_date=True, return_string=True
+            ),
+            datetime(2021, 1, 1).isoformat(),
         )
         self.assertEqual(
             parse_datetime(date(2021, 1, 1), tzone_aware=False, only_date=False),
@@ -261,3 +287,6 @@ class JsonTest(unittest.TestCase):
         )
 
         self.assertIsNone(parse_datetime(object, fail_silently=True))
+        self.assertIsNone(
+            parse_datetime(object, fail_silently=True, return_string=True)
+        )

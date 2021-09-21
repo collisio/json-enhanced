@@ -8,6 +8,7 @@ from uuid import uuid4
 import requests
 
 import jsonutils.config as config
+from jsonutils.cache import memoized_method
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import (
     JSONDecodeException,
@@ -173,6 +174,7 @@ class JSONNode:
     """
 
     __odir__ = object.__dir__  # rename old __dir__ method to __odir__
+    __osetattr__ = object.__setattr__
 
     def __init__(self, *args, **kwargs):
 

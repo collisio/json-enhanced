@@ -10,7 +10,7 @@ import pytz
 import requests
 from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
-from jsonutils.functions.decorators import catch_exceptions
+from jsonutils.functions.decorators import catch_exceptions, return_str_or_datetime
 from jsonutils.query import All, AllChoices, ExtractYear, I, QuerySet, ValuesList
 from jsonutils.utils.retry import retry_function
 
@@ -345,14 +345,23 @@ def parse_float(
 
 
 @catch_exceptions
+@return_str_or_datetime
 def parse_datetime(
-    s, only_check=False, tzone_aware=True, only_date=False, fail_silently=False
+    s,
+    only_check=False,
+    tzone_aware=True,
+    only_date=False,
+    fail_silently=False,
+    return_string=False,
 ):
     """
     If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors).
     Algorithm is tzone aware by default. If no tzone is found on string, UTC will be considered.
     """
-    if not all(isinstance(arg, bool) for arg in (only_check, tzone_aware, only_date)):
+    if not all(
+        isinstance(arg, bool)
+        for arg in (only_check, tzone_aware, only_date, fail_silently, return_string)
+    ):
         raise TypeError("Invalid type arguments. All keyword arguments must be boolean")
 
     if isinstance(s, (date, datetime)):
