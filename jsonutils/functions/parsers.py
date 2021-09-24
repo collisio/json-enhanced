@@ -411,15 +411,45 @@ def parse_datetime(
             try:
                 return int(x)
             except ValueError:
-                return
+                if isinstance(x, str):
+                    lower_month = x.lower()
+                    if "jan" in lower_month:
+                        return 1
+                    elif "feb" in lower_month:
+                        return 2
+                    elif "mar" in lower_month:
+                        return 3
+                    elif "apr" in lower_month:
+                        return 4
+                    elif "may" in lower_month:
+                        return 5
+                    elif "jun" in lower_month:
+                        return 6
+                    elif "jul" in lower_month:
+                        return 7
+                    elif "aug" in lower_month:
+                        return 8
+                    elif "sep" in lower_month:
+                        return 9
+                    elif "oct" in lower_month:
+                        return 10
+                    elif "nov" in lower_month:
+                        return 11
+                    elif "dec" in lower_month:
+                        return 12
+                    else:
+                        return
+                else:
+                    return
 
     patterns = (
         r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:[Zz]|\.\d{3,}[Zz]?|(?:\.\d{3,})?(?P<off_sign>[+-])(?P<off_hh>\d{2}):(?P<off_mm>\d{2}))?\s*)?",
         r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:[Zz]|\.\d{3,}[Zz]?|(?:\.\d{3,})?(?P<off_sign>[+-])(?P<off_hh>\d{2}):(?P<off_mm>\d{2}))?\s*)?",
+        r"\s*(?P<month>jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s*,?\s*(?P<day>\d{1,2})\s*,?\s*(?P<year>\d{4})\s*,?\s*(?:T?\s*(?P<hour>\d{1,2})[:.](?P<min>\d{2})(?:[:](?P<sec>\d{2}))?(?:[Zz]|\.\d{3,}[Zz]?|(?:\.\d{3,})?(?P<off_sign>[+-])(?P<off_hh>\d{2}):(?P<off_mm>\d{2}))?\s*)?",
     )
 
     for pattern in patterns:
-        if match := re.fullmatch(pattern, s):
+        if match := re.fullmatch(pattern, s, re.I):
             if only_check:
                 return True
 

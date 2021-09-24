@@ -46,7 +46,7 @@ from jsonutils.base import (
     JSONUnknown,
 )
 from jsonutils.exceptions import JSONQueryException
-from jsonutils.functions.parsers import parse_datetime, parse_float
+from jsonutils.functions.parsers import parse_datetime, parse_float, url_validator
 from jsonutils.query import All
 
 
@@ -446,6 +446,10 @@ def _type(node, requested_value):
         "None",
         "singleton",
         "number",
+        "numeric",
+        "numerical",
+        "url",
+        "web",
         "unknown",
     ):
         raise JSONQueryException(
@@ -504,8 +508,13 @@ def _type(node, requested_value):
                 return True
             else:
                 return False
-        elif requested_value == "number":
+        elif requested_value in ("number", "numeric", "numerical"):
             if node.to_float(only_check=True):
+                return True
+            else:
+                return False
+        elif requested_value in ("url", "web"):
+            if url_validator(node, optative_protocol=True):
                 return True
             else:
                 return False

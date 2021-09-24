@@ -1,6 +1,6 @@
 import json
 import unittest
-from datetime import date, datetime
+from datetime import date, datetime, tzinfo
 
 import pytz
 from jsonutils.base import (
@@ -284,6 +284,24 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             parse_datetime("2020-07-14T12:31:45Z"),
             datetime(2020, 7, 14, 12, 31, 45, tzinfo=pytz.utc),
+        )
+
+        self.assertEqual(
+            parse_datetime("Sep 9, 2021"), datetime(2021, 9, 9, tzinfo=pytz.utc)
+        )
+        self.assertEqual(
+            parse_datetime("dec,  1 2021, 09:30"),
+            datetime(2021, 12, 1, 9, 30, tzinfo=pytz.utc),
+        )
+
+        self.assertEqual(
+            parse_datetime("january,  1 2021, 9:30:05"),
+            datetime(2021, 1, 1, 9, 30, 5, tzinfo=pytz.utc),
+        )
+
+        self.assertEqual(
+            parse_datetime("feb,  12, 2021, 9:30:05.123+02:00", return_string=True),
+           "2021-02-12T09:30:05+02:00",
         )
 
         self.assertIsNone(parse_datetime(object, fail_silently=True))
