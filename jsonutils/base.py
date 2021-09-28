@@ -139,14 +139,14 @@ class JSONObject:
                 raise JSONDecodeException(f"Wrong data's format: {type(data)}")
 
     @classmethod
-    def open(cls, file):
+    def open(cls, file, **kwargs):
         """
         Open an external JSON file.
         If a valid url string is passed, then it will try to make a get request to such a target and decode a json file
         """
         file = str(file)
         if url_validator(file):
-            req = retry_function(requests.get, file, raise_exception=False)
+            req = retry_function(requests.get, file, raise_exception=False, **kwargs)
             try:
                 data = req.json()
             except Exception as e:

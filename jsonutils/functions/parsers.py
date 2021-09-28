@@ -514,7 +514,7 @@ def parse_bool(s, fail_silently=False):
         raise JSONSingletonException(f"Can't parse target bool: {s}")
 
 
-def parse_json(s):
+def parse_json(s, **kwargs):
     """Parse all jsons from a text string or URL"""
 
     if not isinstance(s, str):
@@ -522,7 +522,7 @@ def parse_json(s):
     output = QuerySet(list_of_root_nodes=True)
 
     if url_validator(s):
-        req = retry_function(requests.get, s)
+        req = retry_function(requests.get, s, **kwargs)
         s = req.text
 
     def extract_json_objects(text, decoder=JSONDecoder()):
