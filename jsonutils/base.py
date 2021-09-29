@@ -139,14 +139,16 @@ class JSONObject:
                 raise JSONDecodeException(f"Wrong data's format: {type(data)}")
 
     @classmethod
-    def open(cls, file, **kwargs):
+    def open(cls, file, raise_exception=True, **kwargs):
         """
         Open an external JSON file.
         If a valid url string is passed, then it will try to make a get request to such a target and decode a json file
         """
         file = str(file)
         if url_validator(file):
-            req = retry_function(requests.get, file, raise_exception=False, **kwargs)
+            req = retry_function(
+                requests.get, file, raise_exception=raise_exception, **kwargs
+            )
             try:
                 data = req.json()
             except Exception as e:
@@ -158,6 +160,21 @@ class JSONObject:
         with open(file) as f:
             data = json.load(f)
         return cls(data)
+
+    @classmethod
+    def loads(cls, string, **kwargs):
+        """
+        This is a wrapper for json.loads. It takes a json string as argument and returns a JSONNode instance
+        """
+
+        try:
+            data = json.loads(string, **kwargs)
+        except Exception as e:
+            raise JSONDecodeException(
+                f"Error when parsing the json string. Error message: {e}"
+            )
+        else:
+            return cls(data)
 
 
 class JSONNode:
