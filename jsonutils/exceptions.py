@@ -13,3 +13,6 @@ class JSONDecodeException(Exception):
 
 class JSONQueryMultipleValues(JSONQueryException):
     pass
+
+class JSONSchemaError(Exception):
+    pass

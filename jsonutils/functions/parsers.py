@@ -483,6 +483,8 @@ def parse_datetime(
                         else datetime(year, month, day, hour, min, sec)
                     )
             except Exception as e:
+                if only_check:
+                    return True
                 raise JSONSingletonException(
                     f"Error on introduced datetime. {e}"
                 ) from None

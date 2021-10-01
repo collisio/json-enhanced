@@ -159,8 +159,19 @@ class JsonTest(unittest.TestCase):
     def test_append_method(self):
 
         test1 = self.test1.copy()
+        test2 = self.test5.copy()
 
         test1.append({"fake": True})
+        test2.append(test1._1.Dict.List, serialize_nodes=True)
+
+        self.assertEqual(test2[-1], test1._1.Dict.List)
+        self.assertNotEqual(test2[-1]._0.jsonpath, test1._1.Dict.List._0.jsonpath)
+        self.assertEqual(test2[-1]._0.jsonpath, "3/0/")
+
+        test2.append(test1._1.Dict.List, serialize_nodes=False)
+        # if not serializing nodes, the new appended jsonpath will not match the path within test2 jsonobject
+        self.assertEqual(test2[-1], test1._1.Dict.List)
+        self.assertEqual(test2[-1]._0.jsonpath, test1._1.Dict.List._0.jsonpath)
 
         self.assertIsInstance(test1, JSONList)
         self.assertIsInstance(test1[0], JSONDict)
@@ -1053,4 +1064,21 @@ class JsonTest(unittest.TestCase):
                 path="fake",
             ),
             QuerySet([]),
+        )
+
+    def test_traverse_json(self):
+        # TODO what if a key has an explicit "
+        test = JSONObject([{"A": 1, "B": {"B1": 2, "B2": [3, 4]}}])
+
+        self.assertListEqual(
+            test.traverse_json().values("path", flat=True),
+            [
+                "[0]",
+                '[0]["A"]',
+                '[0]["B"]',
+                '[0]["B"]["B1"]',
+                '[0]["B"]["B2"]',
+                '[0]["B"]["B2"][0]',
+                '[0]["B"]["B2"][1]',
+            ],
         )

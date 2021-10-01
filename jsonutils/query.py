@@ -397,7 +397,7 @@ class QuerySet(list):
                     output.append(item)
             return output
 
-    def values(self, *keys, search_upwards=True, **kwargs):
+    def values(self, *keys, search_upwards=True, flat=False, **kwargs):
         """
         This method changes the values returned by the queryset.
         The returned values will be python types.
@@ -413,7 +413,7 @@ class QuerySet(list):
 
         values_list = ValuesList(
             (
-                item.values(*keys, search_upwards=search_upwards, **kwargs)
+                item.values(*keys, search_upwards=search_upwards, flat=flat, **kwargs)
                 for item in self
             )
         )

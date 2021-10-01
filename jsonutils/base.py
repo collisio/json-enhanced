@@ -15,6 +15,7 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
+from jsonutils.functions.decorators import catch_exceptions
 from jsonutils.functions.parsers import (
     _parse_query,
     _parse_query_key,
@@ -109,13 +110,25 @@ class JSONObject:
         "_is_annotation",
     )
 
-    def __new__(cls, data=None, raise_exception=False):
+    def __new__(cls, data=None, raise_exception=False, serialize_nodes=False):
+        """
+        Params:
+        ------
+            data: the json data that is going to be parsed.
+            raise_exception: if True, then an exception will be raised if data type is not known. Otherwise, a JSONUnknown
+                instance will be created for such a data.
+            serialize_nodes: if True and data represents a node instance, then take it as a raw data, discarding
+                all its old node attributes.
+        """
         if not isinstance(raise_exception, bool):
             raise TypeError(
                 f"raise_exception argument must be a boolean, not {type(raise_exception)}"
             )
         if isinstance(data, JSONNode):
-            return data
+            if serialize_nodes:
+                return cls(data._data)
+            else:
+                return data
         elif isinstance(data, type(None)):
             return JSONNull(data)
         elif isinstance(data, dict):
@@ -245,7 +258,11 @@ class JSONNode:
             parent = parent.parent
         return last
 
-    def values(self, *keys, search_upwards=True, **kwargs):
+    def values(self, *keys, search_upwards=True, flat=False, **kwargs):
+        if flat is True and len(keys) > 1:
+            raise ValueError(
+                "If flat argument is selected, you can only set one key value"
+            )
         output_dict = ValuesDict({k: None for k in keys})
 
         if kwargs:
@@ -298,7 +315,7 @@ class JSONNode:
                     else:
                         break
 
-        return output_dict
+        return output_dict if not flat else list(output_dict.values())[0]
 
     def __str__(self):
         return self.json_encode(indent=4)
@@ -654,6 +671,36 @@ class JSONCompose(JSONNode):
                 if item.is_composed and recursive:
                     item._remove_annotations()
 
+    @catch_exceptions
+    def _eval_path(self, path, fail_silently=False):
+        """
+        Evaluate JSONCompose object over a jsonpath
+        """
+        # TODO add test
+        if isinstance(path, str):
+            aux = JSONPath()
+            aux._path = path
+            path = aux
+        return eval(f"self{path.expr}")
+
+    def traverse_json(self):
+        """
+        Traverse recursively over all json data
+        """
+
+        output_list = QuerySet()
+
+        children = self._child_objects.values()
+        for child in children:
+            serialized_child = child._data
+            output_list.append(
+                JSONObject({"path": child.jsonpath.expr, "value": serialized_child})
+            )
+            if child.is_composed:
+                output_list += child.traverse_json()
+
+        return output_list
+
     def check_valid_types(self):
         """Check if json object has valid types (not unknown types)"""
 
@@ -668,6 +715,12 @@ class JSONCompose(JSONNode):
             return False, errors
         else:
             return True, None
+
+    def validate_schema(self, schema):
+        """Validate against a json schema with defined types"""
+        from jsonutils.functions.validator import _validate_data
+
+        return _validate_data(self, schema)
 
 
 class JSONSingleton(JSONNode):
@@ -791,9 +844,9 @@ class JSONList(list, JSONCompose):
         super().__init__(*args, **kwargs)
         JSONCompose.__init__(self, *args, **kwargs)
 
-    def append(self, item):
+    def append(self, item, serialize_nodes=True):
 
-        child = JSONObject(item)
+        child = JSONObject(item, serialize_nodes=serialize_nodes)
         child._index = self.__len__()
         child.parent = self
 
