@@ -319,6 +319,46 @@ class QuerySet(list):
 
         return (updated_objects, not_updated_objects)
 
+    def update_ifnonnull(self, new_obj):
+        """
+        Update elements of queryset (inplace) within JSONObject from which they are derived (self._root),
+        only if new_obj is non null
+        """
+        if self._list_of_root_nodes:
+            return  # TODO if list of root nodes, call each node's query
+
+        # TODO add test for update when callables
+        is_callable = callable(new_obj)
+
+        updated_objects = 0
+        not_updated_objects = 0
+
+        for item in self:
+            path = item.jsonpath.relative_to(self._root)
+            if is_callable:
+                try:
+                    updated_value = new_obj(
+                        self._root._eval_path(path, fail_silently=True)
+                    )
+                    if not updated_value and updated_value != 0:
+                        raise Exception
+                    exec(f"self._root{path} = updated_value")
+                except Exception:
+                    not_updated_objects += 1
+                else:
+                    updated_objects += 1
+            else:
+                try:
+                    if not new_obj and new_obj != 0:
+                        raise Exception
+                    exec(f"self._root{path} = new_obj")
+                except Exception:
+                    not_updated_objects += 1
+                else:
+                    updated_objects += 1
+
+        return (updated_objects, not_updated_objects)
+
     def distinct(self, transform=None):
         """
         Returns unique values in a querylist
@@ -560,6 +600,7 @@ class ExtractYear:
             return str(query_value) in str(self.year)
         else:
             return False
+
 
 class Length:
     def __init__(self, data):

@@ -709,7 +709,20 @@ class JsonTest(unittest.TestCase):
                 ],
             }
         )
+        test2 = JSONObject(dict(A=1, B=2))
         test6 = self.test6.copy()
+
+        self.assertEqual(test2.query(A=All).update_ifnonnull(None), (0, 1))
+        self.assertDictEqual(test2, dict(A=1, B=2))
+        self.assertEqual(
+            test2.query(A=All).update_ifnonnull(lambda x: None if x == 1 else 3), (0, 1)
+        )
+        self.assertDictEqual(test2, dict(A=1, B=2))
+        self.assertEqual(
+            test2.query(A=All).update_ifnonnull(lambda x: 0 if x + 1 == 2 else 3),
+            (1, 0),
+        )
+        self.assertDictEqual(test2, dict(A=0, B=2))
 
         self.assertEqual(test6.query(data__0=True).update("OK"), (1, 0))
         self.assertEqual(

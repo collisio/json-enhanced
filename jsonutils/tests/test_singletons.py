@@ -301,10 +301,20 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(
             parse_datetime("feb,  12, 2021, 9:30:05.123+02:00", return_string=True),
-           "2021-02-12T09:30:05+02:00",
+            "2021-02-12T09:30:05+02:00",
         )
 
         self.assertIsNone(parse_datetime(object, fail_silently=True))
         self.assertIsNone(
             parse_datetime(object, fail_silently=True, return_string=True)
         )
+
+        self.assertRaisesRegex(
+            JSONSingletonException,
+            "Error on introduced datetime",  # month is not in 1..12
+            lambda: parse_datetime("05-26-2021"),
+        )
+
+        self.assertTrue(
+            parse_datetime("05-26-2021", only_check=True)
+        )  # because pattern matches a datetime

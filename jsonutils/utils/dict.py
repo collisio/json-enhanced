@@ -54,3 +54,25 @@ class ValuesDict(dict):
         except KeyError:
             return
 
+
+class FlagsDict:
+    """
+    A dict to combine bitflags
+
+    Example
+    -------
+
+    >> FlagsDict("A", "B", "C").get_flags(3)
+        ['A', 'B']
+    """
+
+    def __init__(self, *flags):
+        self.dict = {2 ** i: v for i, v in enumerate(flags)}
+
+    def get_flags(self, num, generator=False):
+        if num:
+            return (
+                (self.dict[x] for x in self.dict if x & num)
+                if generator
+                else [self.dict[x] for x in self.dict if x & num]
+            )
