@@ -13,6 +13,7 @@ from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 from jsonutils.functions.decorators import catch_exceptions, return_str_or_datetime
 from jsonutils.query import All, AllChoices, ExtractYear, I, QuerySet, ValuesList
 from jsonutils.utils.retry import retry_function
+from jsonutils.utils.urls import join_paths
 
 
 def _parse_query(node, include_parent_, **q):
@@ -682,3 +683,61 @@ def url_validator(url, public=False, return_match=False, optative_protocol=False
     return bool(result) and not any(
         (result.groupdict().get(key) for key in ("private_ip", "private_host"))
     )
+
+
+def _parse_html_table(table, parse_links, link_prefix):
+    """
+    Parses an html table
+
+    Arguments
+    ---------
+        table: a BeautifulSoup object which contains a table tag
+        parse_links: if True, then instead of taking the text inside a tag, it will retrieve the first href link, if it exists
+        link_prefix: when parse_links is selected, we can prepend an string to href links
+    """
+
+    # types check
+
+    if not isinstance(parse_links, bool):
+        raise TypeError(
+            f"Argument 'parse_links' must be a bool instance, not {type(parse_links)}"
+        )
+    if not isinstance(link_prefix, (type(None), str)):
+        raise TypeError(
+            f"Argument 'link_prefix' must be an str or NoneType instance, not {type(link_prefix)}"
+        )
+
+    if not parse_links and link_prefix is not None:
+        raise ValueError(
+            "If argument 'parse_links' is set to False, then you cannot set a 'link_prefix'"
+        )
+
+    def text(i):
+        return i.text
+
+    def href(i):
+        try:
+            if link_prefix:
+                return join_paths(link_prefix, i.find("a", href=True)["href"])
+            else:
+                return i.find("a", href=True)["href"]
+        except Exception as e:
+            return i.text
+
+    process_tag = href if parse_links else text
+
+    h, [*d] = [i.text for i in table.tr.find_all("th")], [
+        [process_tag(i) for i in b.find_all("td")] for b in table.find_all("tr")
+    ]
+    # h -> headers list
+    # d -> list of records (each record is a list itself)
+
+    if not h:  # if no headers, put a default ones
+        column_number = len(max(d, key=len))
+        h = [str(i) for i in range(column_number)]
+    else:  # if headers already exists, the first element of d is for headers, data will be taken from element one onwards.
+        d = d[1:]
+
+    result = base.JSONObject([dict(zip(h, i)) for i in d])
+
+    return result

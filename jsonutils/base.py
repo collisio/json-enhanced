@@ -6,17 +6,20 @@ from datetime import date, datetime
 from uuid import uuid4
 
 import requests
+from bs4 import BeautifulSoup
 
 import jsonutils.config as config
 from jsonutils.cache import memoized_method
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import (
     JSONDecodeException,
+    JSONNotFoundException,
     JSONQueryException,
     JSONQueryMultipleValues,
 )
 from jsonutils.functions.decorators import catch_exceptions
 from jsonutils.functions.parsers import (
+    _parse_html_table,
     _parse_query,
     _parse_query_key,
     parse_bool,
@@ -188,6 +191,79 @@ class JSONObject:
             )
         else:
             return cls(data)
+
+    @staticmethod
+    def read_html_table(
+        data,
+        raise_exception=True,
+        attrs={},
+        recursive=True,
+        parse_links=False,
+        link_prefix=None,
+        **kwargs,
+    ):
+        if not isinstance(data, str):
+            raise TypeError(f"Argument data must be an str instance")
+
+        if url_validator(data):
+            try:
+                req = retry_function(requests.get, data, **kwargs)
+            except Exception:
+                if raise_exception:
+                    raise
+                else:
+                    return
+
+            soup = BeautifulSoup(req.content, "lxml")
+            table = soup.find("table", attrs, recursive)
+
+            if not table:
+                if raise_exception:
+                    raise JSONNotFoundException(
+                        "A table matching the required parameters has not been found on the selected website."
+                    )
+                else:
+                    return
+
+            try:
+                result = _parse_html_table(
+                    table,
+                    parse_links,
+                    link_prefix,
+                )
+            except Exception:
+                if raise_exception:
+                    raise
+                else:
+                    result = None
+
+            return result
+
+        else:  # data is already an html string
+            soup = BeautifulSoup(data, "lxml")
+            table = soup.find("table", attrs, recursive)
+
+            if not table:
+                if raise_exception:
+                    raise JSONNotFoundException(
+                        "A table matching the required parameters has not been found on the selected website."
+                    )
+                else:
+                    return
+
+            try:
+                result = _parse_html_table(
+                    table,
+                    parse_links,
+                    link_prefix,
+                )
+            except Exception:
+                if raise_exception:
+                    raise
+                else:
+                    result = None
+
+            return result
 
 
 class JSONNode:

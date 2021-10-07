@@ -16,3 +16,6 @@ class JSONQueryMultipleValues(JSONQueryException):
 
 class JSONSchemaError(Exception):
     pass
+
+class JSONNotFoundException(Exception):
+    pass
