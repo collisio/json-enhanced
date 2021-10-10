@@ -319,15 +319,14 @@ def parse_float(
     try:
         result = float(s)
     except Exception:
-        if only_check:
-            return False
+        pass
     else:
         if only_check:
             return True
         else:
             return result
     match = re.fullmatch(
-        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*\w{{,10}}\s*",
+        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*\w{{,6}}\.?\s*",
         s,
     )
     if not match:
@@ -336,6 +335,9 @@ def parse_float(
         raise JSONSingletonException(
             f"Target string does not match a float number: {s}"
         )
+    else:
+        if only_check:
+            return True
     groups = match.groups()
     sign = groups[0] or groups[1] or ""
     number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
@@ -343,6 +345,48 @@ def parse_float(
     number_right = number_right.replace(decimal_sep, ".")
 
     return float("".join((sign, number_left, number_right)))
+
+
+@catch_exceptions
+def parse_int(
+    s,
+    only_check=False,
+    decimal_sep=decimal_separator,
+    thousands_sep=thousands_separator,
+    fail_silently=False,
+):
+
+    if decimal_sep == thousands_sep:
+        raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
+    if isinstance(s, bool):
+        raise JSONSingletonException("s argument cannot be boolean type")
+    try:
+        result = int(s)
+    except Exception:
+        pass
+    else:
+        if (
+            only_check
+        ):  # if an int has been parsed, with only check True will be returned
+            return True
+        else:
+            return result
+    match = re.fullmatch(
+        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)(\d+(?:\d|{thousands_sep}\d+)*)(?:\w|\s|\$|€){{,6}}\.?\s*",
+        s,
+    )
+    if not match:
+        if only_check:
+            return False
+        raise JSONSingletonException(f"Target string does not match a int number: {s}")
+    else:
+        if only_check:
+            return True
+    groups = match.groups()
+    sign = groups[0] or groups[1] or ""
+    number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
+
+    return int("".join((sign, number_left)))
 
 
 @catch_exceptions
@@ -496,8 +540,16 @@ def parse_datetime(
 
 
 @catch_exceptions
-def parse_timestamp(s, **kwargs):
-    result = int(parse_datetime(s, **kwargs).timestamp() * 1000)
+def parse_timestamp(s, kind="milliseconds", **kwargs):
+    """
+    Parse a datetime and then converts it to a timestamp, in milliseconds or seconds (default milliseconds)
+    """
+    if kind not in ("milliseconds", "seconds"):
+        raise ValueError(
+            f"Argument 'kind' must be one of the following strings: 'milliseconds', 'seconds'. Not {kind}"
+        )
+    factor = {"milliseconds": 1000, "seconds": 1}
+    result = int(parse_datetime(s, **kwargs).timestamp() * factor[kind])
     return result
 
 

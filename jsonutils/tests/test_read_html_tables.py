@@ -109,7 +109,9 @@ class JsonTest(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            JSONObject.read_html_table(table, parse_links=True, link_prefix="/pre/prefix/"),
+            JSONObject.read_html_table(
+                table, parse_links=True, link_prefix="/pre/prefix/"
+            ),
             JSONObject(
                 [
                     {
