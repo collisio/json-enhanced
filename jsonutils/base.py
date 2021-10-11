@@ -492,6 +492,11 @@ class JSONNode:
 
         return _endswith(self, other)
 
+    def apply_action(self, other):
+        from jsonutils.functions.actions import _apply
+
+        return _apply(self, other)
+
 
 class JSONCompose(JSONNode):
     """

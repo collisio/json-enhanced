@@ -663,3 +663,53 @@ def _endswith(node, requested_value):
             return False
     else:
         return False
+
+
+def _apply(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject have a certain value after applying an user function
+
+    Arguments
+    ---------
+        requested_value: a list, tuple or set of two elements. First element will be the function to apply, and second the real requested value.
+    """
+    # TODO add test
+
+    if not isinstance(requested_value, (list, tuple, set)) or len(requested_value) != 2:
+        raise TypeError(
+            f"Argument 'requested_value' must be an iterable of two elements"
+        )
+
+    function, req_value = requested_value
+
+    if not callable(function):
+        raise TypeError(
+            f"First element of 'requested_value' argument must be a callable, not {type(function)}"
+        )
+
+    # check if req_value is an iterable. If it is, then we will loop over its items, and check
+    # if the output result of applying the function over the node matches any of them
+    try:
+        _ = iter(req_value)
+    except TypeError:
+        is_req_value_iterable = False
+    else:
+        is_req_value_iterable = True
+
+    try:
+        function_result = function(node)
+    except Exception:
+        return False
+
+    if is_req_value_iterable:
+
+        if function_result in req_value:
+            return True
+        else:
+            return False
+
+    # if not an iterable
+    if function_result == req_value:
+        return True
+    else:
+        return False
