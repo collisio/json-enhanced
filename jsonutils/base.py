@@ -158,12 +158,17 @@ class JSONObject:
     def open(cls, file, raise_exception=True, **kwargs):
         """
         Open an external JSON file.
-        If a valid url string is passed, then it will try to make a get request to such a target and decode a json file
+        If a valid url string is passed, then it will try to make a get/post request to such a target and decode a json file
         """
+        # decide whether to use requests.get or requests.post by checking kwargs
+        if kwargs.get("json") or kwargs.get("data"):
+            FUNCTION = requests.post
+        else:
+            FUNCTION = requests.get
         file = str(file)
         if url_validator(file):
             req = retry_function(
-                requests.get, file, raise_exception=raise_exception, **kwargs
+                FUNCTION, file, raise_exception=raise_exception, **kwargs
             )
             try:
                 data = req.json()
