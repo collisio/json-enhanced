@@ -22,6 +22,7 @@ from jsonutils.functions.parsers import (
     _parse_html_table,
     _parse_query,
     _parse_query_key,
+    _to_django_model,
     parse_bool,
     parse_datetime,
     parse_float,
@@ -904,6 +905,11 @@ class JSONDict(dict, JSONCompose):
             return child
         else:
             return default
+
+    def to_django_model(self, model, fail_silently=False):
+        """Translates a JSON dict to Django model new instance"""
+
+        return _to_django_model(self, model, fail_silently=fail_silently)
 
     # ---- COMPARISON METHODS ----
     def __eq__(self, other):

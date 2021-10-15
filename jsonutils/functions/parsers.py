@@ -629,6 +629,15 @@ def parse_http_url(url, fail_silently=False):
         raise Exception(f"Can't parse a valid url: {url}")
 
 
+@catch_exceptions
+def _to_django_model(node, model, fail_silently=False):
+    # TODO add more checks
+    data = node.json_decode
+    obj, _ = model.objects.get_or_create(**data)
+
+    return obj
+
+
 def url_validator(url, public=False, return_match=False, optative_protocol=False):
     """
     :param value: URL address string to validate
