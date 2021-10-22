@@ -632,10 +632,30 @@ def parse_http_url(url, fail_silently=False):
 
 @catch_exceptions
 def _to_django_model(
-    node, model, manager="objects", kind="create", fail_silently=False
+    node,
+    model,
+    manager="objects",
+    kind="create",
+    get_fields=(),
+    default_fields=(),
+    fail_silently=False,
 ):
     # TODO add more checks
-    data = node.json_decode
+    # TODO add test
+
+    if get_fields:
+        data = node.get_fields(*get_fields).json_decode
+        if default_fields:
+            defaults = node.get_fields(*get_fields).json_decode
+        else:
+            defaults = node.get_fields_except(*get_fields).json_decode
+    else:
+        data = node.json_decode
+        if default_fields:
+            defaults = node.get_fields(*get_fields).json_decode
+        else:
+            defaults = data
+
     if kind == "create":
         method = "get_or_create"
     elif kind == "update":
@@ -645,7 +665,7 @@ def _to_django_model(
             f"Argument 'kind' must be one of the following: 'create', 'update'. Not {kind}"
         )
     full_function = reduce(getattr, [manager, method], model)
-    obj, _ = full_function(**data)
+    obj, _ = full_function(**data, defaults=defaults)
 
     return obj
 

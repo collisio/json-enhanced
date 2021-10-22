@@ -914,6 +914,33 @@ class JSONDict(dict, JSONCompose):
         obj = cls(self.json_decode)
         return obj
 
+    def get_fields(self, *args, inplace=False):
+        """
+        Returns a subset of this dict with selected fields, if it exists
+        """
+        # TODO add test
+        if inplace:
+            for key in list(self):
+                if key not in args:
+                    self.pop(key)
+            return
+
+        obj = {k: v for k, v in self.items() if k in args}
+        return JSONDict(obj)
+
+    def get_fields_except(self, *args, inplace=False):
+        """
+        Returns those fields from the dict that are not contained in *args
+        """
+        if inplace:
+            for key in list(self):
+                if key in args:
+                    self.pop(key)
+            return
+
+        obj = {k: v for k, v in self.items() if k not in args}
+        return JSONDict(obj)
+
     def pop(self, key, default=_DEFAULT):
         """
         When removing a key from dict, we also must unregister the corresponding child
@@ -928,12 +955,44 @@ class JSONDict(dict, JSONCompose):
             return default
 
     def to_django_model(
-        self, model, manager="objects", kind="create", fail_silently=False
+        self,
+        model,
+        manager="objects",
+        kind="create",
+        get_fields=(),
+        default_fields=(),
+        fail_silently=False,
     ):
-        """Translates a JSON dict to Django model new instance"""
+        """
+        Translates a JSON dict to Django model new instance
+        Arguments
+        ---------
+            manager:
+            kind:
+            get_fields: the subset of fields which will be gathered in the get request
+        """
+
+        def _check_type(arg):
+            if isinstance(arg, str):
+                return (arg,)
+            elif isinstance(arg, (list, tuple)):
+                return arg
+            elif isinstance(arg, type(None)):
+                return ()
+            else:
+                raise TypeError(f"Argument '{arg}' must be an iterable instance")
+
+        get_fields = _check_type(get_fields)
+        default_fields = _check_type(default_fields)
 
         return _to_django_model(
-            self, model, manager=manager, kind=kind, fail_silently=fail_silently
+            self,
+            model,
+            manager=manager,
+            kind=kind,
+            get_fields=get_fields,
+            default_fields=default_fields,
+            fail_silently=fail_silently,
         )
 
     # ---- COMPARISON METHODS ----
