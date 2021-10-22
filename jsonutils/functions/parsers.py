@@ -3,6 +3,7 @@
 import ast
 import re
 from datetime import date, datetime
+from functools import reduce
 from json import JSONDecoder
 
 import jsonutils.base as base
@@ -630,10 +631,21 @@ def parse_http_url(url, fail_silently=False):
 
 
 @catch_exceptions
-def _to_django_model(node, model, fail_silently=False):
+def _to_django_model(
+    node, model, manager="objects", kind="create", fail_silently=False
+):
     # TODO add more checks
     data = node.json_decode
-    obj, _ = model.objects.get_or_create(**data)
+    if kind == "create":
+        method = "get_or_create"
+    elif kind == "update":
+        method = "update_or_create"
+    else:
+        raise ValueError(
+            f"Argument 'kind' must be one of the following: 'create', 'update'. Not {kind}"
+        )
+    full_function = reduce(getattr, [manager, method], model)
+    obj, _ = full_function(**data)
 
     return obj
 

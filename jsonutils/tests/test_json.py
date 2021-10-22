@@ -683,7 +683,40 @@ class JsonTest(unittest.TestCase):
         self.assertTrue(q5._check_against_node(test._1.date))
         self.assertTrue(q6._check_against_node(test._0.B))
 
-    def test_update(self):
+    def test_update_in_nodes(self):
+        test = JSONObject(
+            {
+                "data": [
+                    {"name": "Dan", "id": [1, 2]},
+                    {
+                        "name": "Don",
+                        "id": [0, 3],
+                        "comments": [{"id": 1, "value": "Great"}],
+                    },
+                ],
+                "timestamp": "2021-01-01 10:00:00Z",
+                "valuation": {"pre": 10, "post": 9},
+            }
+        )
+        # update timestamp
+        pre_path = test.get(timestamp__year=2021).jsonpath
+
+        self.assertEqual(
+            test.get(timestamp__year=2021).update(lambda x: "2022" + x[4:]), True
+        )
+        self.assertEqual(test.get(timestamp__year=2022), "2022-01-01 10:00:00Z")
+        self.assertEqual(test.get(timestamp__year=2021, throw_exceptions_=False), None)
+        self.assertEqual(pre_path, test.timestamp.jsonpath)
+
+        # failing updating timestamp
+
+        self.assertEqual(test.timestamp.update(lambda x: x ** 2), False)
+        self.assertEqual(test.get(timestamp__year=2022), "2022-01-01 10:00:00Z")
+
+        # update id
+        self.assertEqual(test.get(id__0=1).update(lambda x: x + ["fake"]), True)
+
+    def test_update_in_queries(self):
 
         test = JSONObject(
             {

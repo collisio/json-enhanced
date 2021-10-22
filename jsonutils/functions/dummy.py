@@ -11,6 +11,12 @@ from jsonutils.base import (
     JSONStr,
 )
 
+class _EmptyType(type):
+    pass
+
+class _empty(metaclass=_EmptyType):
+    pass
+
 
 def dummy_json(
     min_dict_length=2,
