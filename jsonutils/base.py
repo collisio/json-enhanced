@@ -888,6 +888,29 @@ class JSONCompose(JSONNode):
         return output_list
 
     def to_path(self):
+        """
+        Retrieve a list of json leaf nodes paths
+
+        Example
+        -------
+
+        data = JSONObject(
+            {
+                "A": [
+                    {
+                        "A1": 1
+                    },
+                    {
+                        "A2": 2
+                    }
+                ],
+                "B": 3
+            }
+        )
+
+        >> data.to_path()
+            [(('A', 0, 'A1'), 1), (('A', 1, 'A2'), 2), (('B',), 3)]
+        """
         output_list = []
 
         children = self._child_objects.values()
@@ -920,6 +943,26 @@ class JSONCompose(JSONNode):
         from jsonutils.functions.validator import _validate_data
 
         return _validate_data(self, schema)
+
+    def save(self, path, ensure_ascii=False, indent=4, **kwargs):
+        """
+        Save the JSON Composed object to a file.
+        Arguments
+        ---------
+            path: full path where to store the output file
+            ensure_ascii: if you want to handle unicode values
+            indent: number of indents (default 4)
+        """
+
+        with open(path, "w") as file:
+            json.dump(
+                self,
+                file,
+                cls=JSONObjectEncoder,
+                ensure_ascii=ensure_ascii,
+                indent=indent,
+                **kwargs,
+            )
 
 
 class JSONSingleton(JSONNode):
