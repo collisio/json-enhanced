@@ -33,10 +33,24 @@ from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
 
-try:
-    DjangoQuerySet = sys.modules["django"].db.models.QuerySet
-except Exception:
-    DjangoQuerySet = type(None)
+# ---- external modules ----
+def DjangoQuerySet():
+
+    try:
+        return sys.modules["django"].db.models.QuerySet
+    except Exception:
+        return type(None)
+
+
+def PandasDataFrame():
+
+    try:
+        return sys.modules["pandas"].DataFrame
+    except Exception:
+        return type(None)
+
+
+# ----------------------
 
 
 class JSONPath:
@@ -137,8 +151,6 @@ class JSONObject:
             return JSONNull(data)
         elif isinstance(data, dict):
             return JSONDict(data)
-        elif isinstance(data, (list, tuple, DjangoQuerySet)):
-            return JSONList(data)
         elif isinstance(data, bool):
             return JSONBool(data)
         elif isinstance(data, str):
@@ -149,6 +161,11 @@ class JSONObject:
             return JSONFloat(data)
         elif isinstance(data, int):
             return JSONInt(data)
+        # data from external libraries
+        elif isinstance(data, (list, tuple, DjangoQuerySet())):
+            return JSONList(data)
+        elif isinstance(data, PandasDataFrame()):
+            return JSONDict(json.loads(data.to_json()))
         else:
             if not raise_exception:
                 return JSONUnknown(data)

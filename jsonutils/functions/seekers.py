@@ -498,3 +498,11 @@ class DefaultDict(dict):
         """Returns a new Python's native dict from a DefaultDict object"""
 
         return json.loads(json.dumps(self))
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+
+    x = DefaultDict()
+    x["A"] = None
+    pprint(x)
