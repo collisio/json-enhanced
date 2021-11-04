@@ -1119,12 +1119,44 @@ class JsonTest(unittest.TestCase):
         self.assertListEqual(
             test.traverse_json().values("path", flat=True),
             [
-                "[0]",
-                '[0]["A"]',
-                '[0]["B"]',
-                '[0]["B"]["B1"]',
-                '[0]["B"]["B2"]',
-                '[0]["B"]["B2"][0]',
-                '[0]["B"]["B2"][1]',
+                [0,],
+                [0, "A"],
+                [0, "B"],
+                [0, "B", "B1"],
+                [0, "B", "B2"],
+                [0, "B", "B2", 0],
+                [0, "B", "B2", 1],
             ],
         )
+
+    def test_json_paths(self):
+        test = JSONObject({"A": {"B": [{"C": {"D": 1}}]}})
+
+        self.assertEqual(test.A.B._0.C.D.jsonpath.keys, ("A", "B", 0, "C", "D"))
+        self.assertEqual(test.A.B._0.C.jsonpath.expr, '["A"]["B"][0]["C"]')
+
+        test.set_path(("A", "B", 0, "D"), 10)
+        self.assertTupleEqual(
+            test.query_key("*", exact=10).first().jsonpath.keys, ("A", "B", 0, "D")
+        )
+        test.set_path(("B",), 20)
+        self.assertTupleEqual(
+            test.query_key("*", exact=20).first().jsonpath.keys, ("B",)
+        )
+
+        self.assertRaises(TypeError, lambda: test.set_path(("A", "B", "A"), 30))
+
+    def test_path_exists(self):
+        test = JSONObject({"A": {"B": [{"C": {"D": 1}}]}})
+
+        self.assertTrue(test.path_exists(("A",)))
+        self.assertTrue(test.path_exists(("A", "B")))
+        self.assertTrue(test.path_exists(("A", "B", 0)))
+        self.assertTrue(test.path_exists(("A", "B", 0, "C")))
+        self.assertTrue(test.path_exists(("A", "B", 0, "C", "D")))
+
+        self.assertFalse(test.path_exists(("a",)))
+        self.assertFalse(test.path_exists(("A", 0)))
+        self.assertFalse(test.path_exists(("A", "B", 1)))
+        self.assertFalse(test.path_exists(("A", "B", 0, "c")))
+        self.assertFalse(test.path_exists(("A", "B", 0, "C", "d")))

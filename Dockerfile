@@ -28,11 +28,14 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     JSONNull, \
     JSONBool, \
     JSONUnknown', \
+    'from jsonutils.exceptions import *', \
     'from jsonutils.query import I, SingleQuery, All, ExtractYear', \
     'from jsonutils.functions.parsers import parse_float, \
     parse_datetime, parse_bool, parse_json, url_validator, \
     parse_int, parse_timestamp', \
     'from jsonutils.functions.dummy import dummy_json', \
+    'from jsonutils.functions.converters import dict_to_list', \
+    'from jsonutils.functions.seekers import DefaultDict, DefaultList', \
     'from datetime import date, datetime', \
     'import pytz', \
     'import json', \

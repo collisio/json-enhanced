@@ -62,7 +62,7 @@ class JSONPath:
 
     @property
     def keys(self):
-        return list(reversed(self._keys))
+        return tuple(reversed(self._keys))
 
     def relative_to(self, child):
         """Calculate jsonpath relative to child's jsonpath"""
@@ -271,6 +271,16 @@ class JSONObject:
 
             return result
 
+    @classmethod
+    def from_path(cls, iterable):
+        """
+        Build a JSONObject from a list of leaf node paths
+        """
+        from jsonutils.functions.seekers import _json_from_path
+
+        obj = _json_from_path(iterable)
+        return cls(obj)
+
 
 class JSONNode:
     """
@@ -302,6 +312,15 @@ class JSONNode:
 
     def json_encode(self, **kwargs):
         return json.dumps(self, cls=JSONObjectEncoder, **kwargs)
+
+    @property
+    def is_leaf(self):
+        """Check if this node is a leaf node (no childs)"""
+        try:
+            child_number = self._child_objects.__len__()
+        except AttributeError:
+            return True
+        return not bool(child_number)
 
     @property
     def json_decode(self):
@@ -556,6 +575,58 @@ class JSONCompose(JSONNode):
             for index, item in enumerate(self):
                 self.__setitem__(index, item)
 
+    def path_exists(self, iterable):
+        """
+        Returns a boolean especifing if selected path exist in the composed object.
+        """
+        from jsonutils.functions.seekers import _eval_object
+
+        if isinstance(iterable, (str, int)):
+            iterable = (iterable,)
+        elif isinstance(iterable, JSONPath):
+            iterable = iterable.keys
+
+        try:
+            _eval_object(self, iterable)
+        except (IndexError, KeyError):
+            return False
+        return True
+
+    def set_path(self, path, value):
+        """
+        Set composed object's value on iterable path
+        Example
+        -------
+
+        data = JSONObject(
+            {
+                "data": [
+                    {
+                        "A": True
+                    }
+                ]
+            }
+        )
+
+        >> data.set_path(
+            ("data",0,"B"),
+            False
+        )
+
+        >> data
+            {
+                "data": [
+                    {
+                        "A": True,
+                        "B": False
+                    }
+                ]
+            }
+        """
+        from jsonutils.functions.seekers import _set_object
+
+        return _set_object(self, path, value)
+
     def query(
         self,
         recursive_=None,
@@ -793,7 +864,14 @@ class JSONCompose(JSONNode):
 
     def traverse_json(self):
         """
-        Traverse recursively over all json data
+        Traverse recursively over all json data.
+        Arguments
+        ---------
+            only_leafs: if True, then only leaf nodes will be appended to queryset
+
+        Returns
+        -------
+            QuerySet object
         """
 
         output_list = QuerySet()
@@ -802,10 +880,23 @@ class JSONCompose(JSONNode):
         for child in children:
             serialized_child = child._data
             output_list.append(
-                JSONObject({"path": child.jsonpath.expr, "value": serialized_child})
+                JSONObject({"path": child.jsonpath.keys, "value": serialized_child})
             )
             if child.is_composed:
                 output_list += child.traverse_json()
+
+        return output_list
+
+    def to_path(self):
+        output_list = []
+
+        children = self._child_objects.values()
+        for child in children:
+            if child.is_leaf:
+                serialized_child = child._data
+                output_list.append((child.jsonpath.keys, serialized_child))
+            if child.is_composed:
+                output_list += child.to_path()
 
         return output_list
 

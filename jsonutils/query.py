@@ -497,7 +497,6 @@ class QuerySet(list):
             )
         except Exception as e:
             warnings.warn(f"QuerySet could not be sorted. Info: {e}")
-            # print(e)
             return self
 
         result._root = self._root

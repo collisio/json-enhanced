@@ -19,3 +19,9 @@ class JSONSchemaError(Exception):
 
 class JSONNotFoundException(Exception):
     pass
+
+class JSONPathException(Exception):
+    pass
+
+class JSONConvertException(Exception):
+    pass
