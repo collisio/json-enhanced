@@ -906,7 +906,7 @@ class JSONCompose(JSONNode):
 
     def to_path(self):
         """
-        Retrieve a list of json leaf nodes paths
+        Retrieve a dict of json leaf nodes paths
 
         Example
         -------
@@ -926,19 +926,23 @@ class JSONCompose(JSONNode):
         )
 
         >> data.to_path()
-            [(('A', 0, 'A1'), 1), (('A', 1, 'A2'), 2), (('B',), 3)]
+            {
+                ('A', 0, 'A1'): 1,
+                ('A', 1, 'A2'): 2,
+                ('B',): 3
+            }
         """
-        output_list = []
+        output_dict = {}
 
         children = self._child_objects.values()
         for child in children:
             if child.is_leaf:
                 serialized_child = child._data
-                output_list.append((child.jsonpath.keys, serialized_child))
+                output_dict[child.jsonpath.keys] = serialized_child
             if child.is_composed:
-                output_list += child.to_path()
+                output_dict.update(child.to_path())
 
-        return output_list
+        return output_dict
 
     def check_valid_types(self):
         """Check if json object has valid types (not unknown types)"""
@@ -981,6 +985,18 @@ class JSONCompose(JSONNode):
                 **kwargs,
             )
 
+    def merge_with(self, other, kind="inner_join"):
+        # TODO
+        left_paths = set((i[0] for i in self.to_path()))
+        right_paths = set((i[0] for i in other.to_path()))
+
+        kind = kind.lower().strip()
+
+        if kind == "inner_join":
+            resulting_set = set.intersection(left_paths, right_paths)
+        elif kind == "left_join":
+            pass
+
 
 class JSONSingleton(JSONNode):
     """
@@ -1000,7 +1016,7 @@ class JSONSingleton(JSONNode):
 
 # ---- COMPOSE OBJECTS ----
 class JSONDict(dict, JSONCompose):
-    """ """
+    """A Dict object"""
 
     _DEFAULT = object()
     get = JSONCompose.get  # override get method
@@ -1164,7 +1180,7 @@ class JSONDict(dict, JSONCompose):
 
 
 class JSONList(list, JSONCompose):
-    """ """
+    """A list object"""
 
     def __init__(self, *args, **kwargs):
 

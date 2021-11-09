@@ -203,41 +203,6 @@ def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join
             return _right_join_non_overwriting_with_null(node1, node2)
 
 
-class NaN:
-    """
-    Empty item in a not connected list.
-    This object can only be present within a DefaultList.
-    Do not instantiate it directly
-    """
-
-    def __init__(self, parent, index):
-        self.parent = parent
-        self.index = index
-
-    def __getitem__(self, k):
-        if isinstance(k, str):
-            new_obj = DefaultDict()
-            new_obj.parent = self.parent
-            new_obj.index = self.index
-            self.parent.__osetitem__(self.index, new_obj)
-            parent_dict = self.parent.__ogetitem__(self.index)
-            return parent_dict.__getitem__(k)
-        elif isinstance(k, int):
-            new_obj = DefaultList()
-            new_obj.parent = self.parent
-            new_obj.index = self.index
-            self.parent.__osetitem__(self.index, new_obj)
-            parent_list = self.parent.__ogetitem__(self.index)
-            return parent_list.__getitem__(self.index)
-
-    def __setitem__(self, k, v):
-        # TODO
-        idx = self.index
-
-        self.parent.__osetitem__(idx, v)
-        return
-
-
 def is_iterable(obj):
     """Check if obj is an iterable"""
     try:
@@ -295,11 +260,11 @@ def _check_types(path, value):
 
 def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
     """
-    Build a JSONObject from a list of path/value pairs.
+    Build a JSONObject from a list/dict of path/value pairs.
     Examples
     --------
 
-    >> res = JSONObject.from_path(
+    res1 = JSONObject.from_path(
         [
             (
                 ("A", "B"),
@@ -311,22 +276,54 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
             )
         ]
     )
-    >> res
+    >> res1
         {
             "A": {
                 "B": True,
                 "C": False
             }
         }
+
+    res2 = JSONObject.from_path(
+        {
+            (1, "A", 0): "1/A/0",
+            (0, "A", 1, "B"): "0/A/1/B",
+            (0, "A", 1, "C"): "0/A/1/C",
+            (0, "A", 2): "0/A/2",
+            (0, "A", 0, 0): "0/A/0/0"
+        }
+    )
+    >> res2
+        [
+            {
+                "A": [
+                    "0/A/0/0",
+                    {
+                        "B": "0/A/1/B",
+                        "C": "0/A/1/C"
+                    },
+                    "0/A/2"
+                ]
+            },
+            {
+                "A": [
+                    "1/A/0"
+                ]
+            }
+        ]
+
     """
-    if not isinstance(iterable, list):
-        raise TypeError(f"Argument 'iterable' must be a list, not {type(iterable)}")
+    if not isinstance(iterable, (dict, list)):
+        raise TypeError(
+            f"Argument 'iterable' must be a list or dict, not {type(iterable)}"
+        )
 
     if not iterable:
         raise ValueError(
             "Argument 'iterable' must have a length greater or equals than 1"
         )
-
+    if isinstance(iterable, dict):
+        iterable = iterable.items()
     initial_check = False
     for path, value in iterable:
         # check path and value have right types (path is a list or tuple, and value is not composed)
@@ -354,6 +351,53 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
         raise JSONPathException("node structure is incompatible")
 
     return serialized_dict
+
+
+class NaN:
+    """
+    Empty item in a not connected list.
+    This object can only be present within a DefaultList.
+    Do not instantiate it directly
+    """
+
+    def __init__(self, parent, index):
+        self.parent = parent
+        self.index = index
+
+    def __getitem__(self, k):
+        if isinstance(k, str):
+            new_obj = DefaultDict()
+            new_obj.parent = self.parent
+            new_obj.index = self.index
+            self.parent.__osetitem__(self.index, new_obj)
+            parent_dict = self.parent.__ogetitem__(self.index)
+            return parent_dict.__getitem__(k)
+        elif isinstance(k, int):
+            new_obj = DefaultList()
+            new_obj.parent = self.parent
+            new_obj.index = self.index
+            self.parent.__osetitem__(self.index, new_obj)
+            parent_list = self.parent.__ogetitem__(self.index)
+            return parent_list.__getitem__(self.index)
+
+    def __setitem__(self, k, v):
+
+        idx = self.index
+        parent = self.parent  # this is a DefaultList
+
+        if isinstance(k, str):
+            default_dict = DefaultList._superset(parent, idx, default=DefaultDict)
+            default_dict.__setitem__(k, v)
+            return
+        elif isinstance(k, int):
+            default_list = DefaultList._superset(parent, idx, default=DefaultList)
+            default_list.__setitem__(k, v)
+            return
+        else:
+            raise TypeError(f"Key 'k' must be an str or int instance, not {type(k)}")
+
+    def __repr__(self):
+        return "NaN"
 
 
 class DefaultList(list):
@@ -413,7 +457,7 @@ class DefaultList(list):
         elif isinstance(i, str):
             parent = self.parent
             index = self.index
-            if parent is None or index is None:
+            if self:  # if this DefaultList has any element, it cannot set a key path
                 raise NotImplementedError
             default_dict = self._superset(parent, index, default=DefaultDict)
             return default_dict.__setitem__(i, v)
@@ -489,7 +533,7 @@ class DefaultDict(dict):
         elif isinstance(k, int):
             parent = self.parent
             key = self.key
-            if parent is None or key is None:
+            if self:  # to avoid setting things like x["A"]["A"] = 1; x["A"][0] = 2
                 raise NotImplementedError
             default_list = self._superset(parent, key, default=DefaultList)
             return default_list.__setitem__(k, v)
@@ -503,6 +547,8 @@ class DefaultDict(dict):
 if __name__ == "__main__":
     from pprint import pprint
 
-    x = DefaultDict()
-    x["A"] = None
+    x = DefaultList()
+    x[1][2] = "second"
+    x[1]["A"] = "third"
+    x[0] = "first"
     pprint(x)

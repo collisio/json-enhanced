@@ -41,6 +41,8 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     'import json', \
     'import re', \
     'import requests', \
+    'from bs4 import BeautifulSoup', \
+    'from unicodedata import normalize', \
     'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \
     ]" >> /code/.ipython/profile_template/ipython_config.py
 
