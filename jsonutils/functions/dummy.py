@@ -12,20 +12,6 @@ from jsonutils.base import (
 )
 
 
-class _EmptyType(type):
-    pass
-
-
-class _empty(metaclass=_EmptyType):
-    """
-    This object represents an empty element
-    """
-
-    pass
-
-class Default:
-    pass
-
 def dummy_json(
     min_dict_length=2,
     max_dict_length=5,

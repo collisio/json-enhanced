@@ -338,7 +338,7 @@ class QuerySet(list):
             if is_callable:
                 try:
                     updated_value = new_obj(
-                        self._root._eval_path(path, fail_silently=True)
+                        self._root.eval_path(path, fail_silently=True)
                     )
                     if not updated_value and updated_value != 0:
                         raise Exception

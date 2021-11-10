@@ -29,9 +29,11 @@ from jsonutils.functions.parsers import (
     parse_timestamp,
     url_validator,
 )
+from jsonutils.functions.seekers import _eval_object
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
+
 
 # ---- external modules ----
 def DjangoQuerySet():
@@ -868,11 +870,17 @@ class JSONCompose(JSONNode):
                     item._remove_annotations()
 
     @catch_exceptions
-    def _eval_path(self, path, fail_silently=False):
+    def eval_path(self, path, fail_silently=False):
         """
-        Evaluate JSONCompose object over a jsonpath
+        Evaluate JSONCompose object over a jsonpath.
+
+        Arguments
+        ---------
+            path: nested path on which the object will be evaluated.
         """
         # TODO add test
+        if isinstance(path, (tuple, list)):
+            return _eval_object(self, path)
         if isinstance(path, str):
             aux = JSONPath()
             aux._path = path
