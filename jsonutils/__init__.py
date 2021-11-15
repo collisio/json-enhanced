@@ -8,6 +8,7 @@ from jsonutils.functions.parsers import (
     parse_timestamp,
 )
 from jsonutils.query import All, I, Q
+from jsonutils.utils.urls import join_paths
 
 _JSON_TYPES = (
     dict,
