@@ -712,3 +712,20 @@ def _apply(node, requested_value):
         return True
     else:
         return False
+
+
+def _bool(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject have a certain Python's boolean value given by requested_value
+
+    Arguments
+    ---------
+        requested_value: bool.
+    """
+
+    if not isinstance(requested_value, bool):
+        raise TypeError(
+            f"Argument 'requested_value' must be a bool, not {type(requested_value)}"
+        )
+    
+    return bool(node) == requested_value

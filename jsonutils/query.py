@@ -284,7 +284,7 @@ class QuerySet(list):
         for item in self:
             path = item.parent.jsonpath.relative_to(self._root)
             try:
-                exec(f"self._root{path}.pop(item._key)")
+                self._root.eval_path(path).pop(item._key)
             except Exception:
                 continue
             else:
@@ -308,13 +308,13 @@ class QuerySet(list):
             path = item.jsonpath.relative_to(self._root)
             if is_callable:
                 try:
-                    exec(f"self._root{path} = new_obj(self._root{path})")
+                    self._root.set_path(path, new_obj(self._root.eval_path(path)))
                 except Exception:
                     not_updated_objects += 1
                 else:
                     updated_objects += 1
             else:
-                exec(f"self._root{path} = new_obj")
+                self._root.set_path(path, new_obj)
                 updated_objects += 1
 
         return (updated_objects, not_updated_objects)
@@ -342,7 +342,7 @@ class QuerySet(list):
                     )
                     if not updated_value and updated_value != 0:
                         raise Exception
-                    exec(f"self._root{path} = updated_value")
+                    self._root.set_path(path, updated_value)
                 except Exception:
                     not_updated_objects += 1
                 else:
@@ -351,7 +351,7 @@ class QuerySet(list):
                 try:
                     if not new_obj and new_obj != 0:
                         raise Exception
-                    exec(f"self._root{path} = new_obj")
+                    self._root.set_path(path, new_obj)
                 except Exception:
                     not_updated_objects += 1
                 else:

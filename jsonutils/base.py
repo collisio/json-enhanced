@@ -1,4 +1,6 @@
-# This module contains the base objects needed
+"""
+This module contains the base objects of the JSON structure
+"""
 import json
 import os
 import sys
@@ -17,7 +19,7 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
-from jsonutils.functions.decorators import catch_exceptions
+from jsonutils.functions.decorators import return_value_on_exception
 from jsonutils.functions.parsers import (
     _parse_html_table,
     _parse_query,
@@ -29,7 +31,13 @@ from jsonutils.functions.parsers import (
     parse_timestamp,
     url_validator,
 )
-from jsonutils.functions.seekers import _eval_object
+from jsonutils.functions.seekers import (
+    empty,
+    _eval_object,
+    _json_from_path,
+    _relative_to,
+    _set_object,
+)
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
@@ -59,60 +67,90 @@ class JSONPath:
     """
     Object representing a JSON path for a given JSON object.
     Don't instanciate it directly.
+
+    Attributes
+    ----------
+        data: a pretty string representation of the path. Ex: 'data/0/name'.
+        expr: a python string representation of the path. Ex: '["data"][0]["name"]'.
+        keys: a tuple representation of the path. Ex: ("data", 0, "name").
     """
 
-    def __new__(cls, s=""):
-        obj = super().__new__(cls)
-        obj._string = s  # pretty path
-        obj._path = ""  # python json path
-        obj._keys = []  # list of dict keys
-        return obj
+    @staticmethod
+    def _cast_to_int(s):
+        if s.isdigit():
+            return int(s)
+        else:
+            return s
+
+    def __init__(self, path=()):
+        if isinstance(
+            path, str
+        ):  # if path is given as an string like 'A/0/B', cast it to a tuple like ("A", 0, "B")
+            path = tuple(self._cast_to_int(i) for i in path.split("/") if i != "")
+        if not isinstance(path, tuple):
+            raise TypeError(
+                f"Argument 'path' must be a tuple or str instance, not {type(path)}"
+            )
+        self._keys = path  # tuple of dict keys
 
     @property
     def data(self):
-        return self._string
+        return "/".join(map(str, self._keys))
 
     @property
     def expr(self):
-        return self._path
+        output = ""
+        for k in self._keys:
+            if isinstance(k, str):
+                output += f'["{k}"]'
+            elif isinstance(k, int):
+                output += f"[{k}]"
+        return output
 
     @property
     def keys(self):
-        return tuple(reversed(self._keys))
+        """Returns a tuple with the object's path keys"""
+        return self._keys
 
-    def relative_to(self, child):
-        """Calculate jsonpath relative to child's jsonpath"""
-        # TODO review this algorithm, because it fails when a key has /
+    def relative_to(self, node):
+        """
+        Calculate jsonpath relative to a parent node's jsonpath.
+        Examples of relative paths:
+            * self -> ("A", 0, "B", "C")
+                                            ==> ("B", "C")
+            * node -> ("A", 0)
+        Returns a new JSONPath instance
+        """
 
-        if not isinstance(child, JSONNode):
+        if not isinstance(node, JSONNode):
             raise TypeError(
-                f"child argument must be a JSONNode instance, not {type(child)}"
+                f"child argument must be a JSONNode instance, not {type(node)}"
             )
-        if child.jsonpath._path:
-            root = child.jsonpath._path
-        else:
-            root = ""
-        full_path = self._path
 
-        common_prefix = os.path.commonprefix([root, full_path])
+        self_path = self._keys
+        other_path = node.jsonpath._keys
 
-        return full_path.replace(common_prefix, "")
+        result = _relative_to(self_path, other_path)
+        jsonpath = JSONPath(result)
+        return jsonpath
 
     def _update(self, **kwargs):
         if (key := kwargs.get("key")) is not None:
-            self._string = str(key) + "/" + self._string
-            self._path = f'["{key}"]' + self._path
-            self._keys.append(key)
+            self._keys = (key,) + self._keys
         elif (index := kwargs.get("index")) is not None:
-            self._string = str(index) + "/" + self._string
-            self._path = f"[{index}]" + self._path
-            self._keys.append(index)
+            self._keys = (index,) + self._keys
 
     def __eq__(self, other):
-        return (self._string == other) or (self._path == other)
+        if isinstance(other, (tuple, list)):
+            return self._keys == tuple(other)
+        if isinstance(other, str):
+            return self.data == other
+        if isinstance(other, self.__class__):
+            return self._keys == other._keys
+        return NotImplemented
 
     def __repr__(self):
-        return self._string
+        return self.data
 
 
 class JSONObject:
@@ -220,6 +258,7 @@ class JSONObject:
     @staticmethod
     def read_html_table(
         data,
+        parser="lxml",
         raise_exception=True,
         attrs={},
         recursive=True,
@@ -227,8 +266,31 @@ class JSONObject:
         link_prefix=None,
         **kwargs,
     ):
+        """
+        Loads an html table from an url or string as node instance.
+
+        Params
+        ------
+            data: an string representing the raw data. If an url is passed,
+                  then it will try to make a request to the web and locate a valid html table.
+                  If, on the other hand, the text string represents an html structure,
+                  it will act on it without making any request.
+            parser: parse library to be used by `BeautifulSoup`.
+            raise_exception: if True, then any errors derived from the table lookup will be thrown as response.
+                             If False, it will return None on errors.
+            attrs: a dictionary to be passed as an argument to the `find` function of `BeautifulSoup` object.
+                   It is useful, for example, if you want to specify a particular attribute that must be present in the HTML tags of the table.
+            recursive: it will be passed as an argument to the `find` function of `BeautifulSoup` object.
+                       Specifies whether the table lookup should be recursive or not.
+            parse_links: if True, then instead of taking the text inside a tag, it will retrieve the first href link, if it exists.
+            link_prefix: when `parse_links` is selected, we can prepend an string to href links.
+            kwargs: extra arguments to be passed to the request, such as headers, proxies, etc.
+        """
+        # TODO needs a test
         if not isinstance(data, str):
-            raise TypeError(f"Argument data must be an str instance")
+            raise TypeError(
+                f"Argument data must be an 'str' instance, not {type(data)}"
+            )
 
         if url_validator(data):
             try:
@@ -239,7 +301,7 @@ class JSONObject:
                 else:
                     return
 
-            soup = BeautifulSoup(req.content, "lxml")
+            soup = BeautifulSoup(req.content, parser)
             table = soup.find("table", attrs, recursive)
 
             if not table:
@@ -265,7 +327,7 @@ class JSONObject:
             return result
 
         else:  # data is already an html string
-            soup = BeautifulSoup(data, "lxml")
+            soup = BeautifulSoup(data, parser)
             table = soup.find("table", attrs, recursive)
 
             if not table:
@@ -295,7 +357,6 @@ class JSONObject:
         """
         Build a JSONObject from a list of leaf node paths
         """
-        from jsonutils.functions.seekers import _json_from_path
 
         obj = _json_from_path(iterable)
         return cls(obj)
@@ -385,18 +446,18 @@ class JSONNode:
 
         is_callable = callable(new_obj)
 
-        path = self.jsonpath.expr
+        path = self.jsonpath
         root = self.root
 
         if is_callable:
             try:
-                exec(f"root{path} = new_obj(root{path})")
+                root.set_path(path, new_obj(root.eval_path(path)))
             except Exception:
                 return False
             else:
                 return True
         else:
-            exec(f"root{path} = new_obj")
+            root.set_path(path, new_obj)
         return True
 
     def values(self, *keys, search_upwards=True, flat=False, **kwargs):
@@ -562,6 +623,11 @@ class JSONNode:
 
         return _apply(self, other)
 
+    def bool_action(self, other):
+        from jsonutils.functions.actions import _bool
+
+        return _bool(self, other)
+
 
 class JSONCompose(JSONNode):
     """
@@ -642,7 +708,9 @@ class JSONCompose(JSONNode):
                 ]
             }
         """
-        from jsonutils.functions.seekers import _set_object
+
+        if isinstance(path, JSONPath):
+            path = path.keys
 
         return _set_object(self, path, value)
 
@@ -869,30 +937,40 @@ class JSONCompose(JSONNode):
                 if item.is_composed and recursive:
                     item._remove_annotations()
 
-    @catch_exceptions
-    def eval_path(self, path, fail_silently=False):
+    @return_value_on_exception(empty, (IndexError, KeyError))
+    def eval_path(self, path, fail_silently=False, native_types_=False):
         """
         Evaluate JSONCompose object over a jsonpath.
 
         Arguments
         ---------
             path: nested path on which the object will be evaluated.
+            fail_silently: if True, it will return empty in case of errors (missing paths).
+            native_types_: if True, then the result will be a Python object whenever a right path is found,
+                           instead of a JSONNode object.
         """
-        # TODO add test
-        if isinstance(path, (tuple, list)):
-            return _eval_object(self, path)
-        if isinstance(path, str):
-            aux = JSONPath()
-            aux._path = path
-            path = aux
-        return eval(f"self{path.expr}")
+        if isinstance(path, JSONPath):
+            path = path.keys
+        elif isinstance(path, str):
+            if "/" in path:
+                path = tuple(JSONPath._cast_to_int(i) for i in path.split("/") if i)
+            else:
+                path = (path,)
+
+        if not isinstance(path, (tuple, list)):
+            raise TypeError(
+                f"path argument must be a JSONPath, str, tuple or list instance, not {type(path)}"
+            )
+
+        if native_types_:
+            res = _eval_object(self, path)._data
+        else:
+            res = _eval_object(self, path)
+        return res
 
     def traverse_json(self):
         """
         Traverse recursively over all json data.
-        Arguments
-        ---------
-            only_leafs: if True, then only leaf nodes will be appended to queryset
 
         Returns
         -------
@@ -993,17 +1071,35 @@ class JSONCompose(JSONNode):
                 **kwargs,
             )
 
-    def merge_with(self, other, kind="inner_join"):
+    def merge(self, other, kind="inner_join"):
+        """
+        Makes a JSON merge with other JSON object
+        """
         # TODO
-        left_paths = set((i[0] for i in self.to_path()))
-        right_paths = set((i[0] for i in other.to_path()))
+        other = JSONObject(other)
+        left_paths = set(self.to_path().keys())
+        right_paths = set(other.to_path().keys())
+
+        path_dict = {}
 
         kind = kind.lower().strip()
 
         if kind == "inner_join":
             resulting_set = set.intersection(left_paths, right_paths)
-        elif kind == "left_join":
-            pass
+        elif kind == "outer_join":
+            resulting_set = set.union(left_paths, right_paths)
+        else:
+            raise ValueError(
+                f"Argument 'kind' must match one of the following options: 'inner_join', 'outer_join'"
+            )
+
+        for path in resulting_set:
+            left_value = self.eval_path(path, fail_silently=True, native_types_=True)
+            right_value = other.eval_path(path, fail_silently=True, native_types_=True)
+
+            path_dict[path] = right_value or left_value
+
+        return JSONObject.from_path(path_dict)
 
 
 class JSONSingleton(JSONNode):

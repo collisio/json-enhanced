@@ -4,7 +4,7 @@ from unittest.case import skip
 import jsonutils as js
 from jsonutils.base import JSONObject
 
-# from jsonutils.functions.seekers import _choose_value, _empty
+# from jsonutils.functions.seekers import _choose_value, empty
 
 
 @skip
@@ -15,7 +15,7 @@ class ChooseValueTest(unittest.TestCase):
         self.node_null = JSONObject(None)
         self.node_bool = JSONObject(False)
         self.node_dict = JSONObject({"A": True})
-        self.empty = _empty
+        self.empty = empty
 
     def test_inner_join_overwritting_null(self):
 

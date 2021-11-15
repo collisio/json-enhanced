@@ -399,6 +399,7 @@ def parse_datetime(
     only_date=False,
     fail_silently=False,
     return_string=False,
+    tzone="utc",
 ):
     """
     If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors).
@@ -432,13 +433,13 @@ def parse_datetime(
                 )
             else:  # if not tzinfo is shown, put utc as default
                 return (
-                    unified_datetime.replace(tzinfo=pytz.utc)
+                    unified_datetime.replace(tzinfo=pytz.timezone(tzone))
                     if not only_date
                     else datetime(
                         unified_datetime.year,
                         unified_datetime.month,
                         unified_datetime.day,
-                        tzinfo=pytz.utc,
+                        tzinfo=pytz.timezone(tzone),
                     )
                 )
         else:
@@ -509,11 +510,14 @@ def parse_datetime(
             min = group_numbers.get("min")
             sec = group_numbers.get("sec")
 
-            off_sign = groups.get("off_sign") or "+"
-            off_hh = groups.get("off_hh") or "00"
-            off_mm = groups.get("off_mm") or "00"
+            off_sign = groups.get("off_sign")
+            off_hh = groups.get("off_hh")
+            off_mm = groups.get("off_mm")
 
-            tzone = datetime.strptime(f"{off_sign}{off_hh}:{off_mm}", "%z").tzinfo
+            if all((off_sign, off_hh, off_mm)):
+                tzone = datetime.strptime(f"{off_sign}{off_hh}:{off_mm}", "%z").tzinfo
+            else:
+                tzone = pytz.timezone(tzone)
 
             try:
                 if only_date:
@@ -779,15 +783,6 @@ def url_validator(url, public=False, return_match=False, optative_protocol=False
 
 
 def _parse_html_table(table, parse_links, link_prefix):
-    """
-    Parses an html table
-
-    Arguments
-    ---------
-        table: a BeautifulSoup object which contains a table tag
-        parse_links: if True, then instead of taking the text inside a tag, it will retrieve the first href link, if it exists
-        link_prefix: when parse_links is selected, we can prepend an string to href links
-    """
 
     # types check
 

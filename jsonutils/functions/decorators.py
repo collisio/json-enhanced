@@ -36,19 +36,20 @@ def return_str_or_datetime(func):
     return wrapper
 
 
-def return_false_on_exception(exception):
+def return_value_on_exception(value, exception):
     """
-    When applied on a function, it will return Flase if selected exception is raised
+    When applied on a function, it will return `value` if selected `exception` is raised
+    and argument `fail_silently` is passed as True.
     """
 
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if kwargs.get("only_check") is True:
+            if kwargs.get("fail_silently") is True:
                 try:
                     return func(*args, **kwargs)
                 except exception:
-                    return False
+                    return value
             else:
                 return func(*args, **kwargs)
 
