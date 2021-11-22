@@ -2,9 +2,9 @@
 This module contains the base objects of the JSON structure
 """
 import json
-import os
 import sys
 from datetime import date, datetime
+from pathlib import Path
 from uuid import uuid4
 
 import requests
@@ -32,11 +32,11 @@ from jsonutils.functions.parsers import (
     url_validator,
 )
 from jsonutils.functions.seekers import (
-    empty,
     _eval_object,
     _json_from_path,
     _relative_to,
     _set_object,
+    empty,
 )
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
@@ -1051,15 +1051,20 @@ class JSONCompose(JSONNode):
 
         return _validate_data(self, schema)
 
-    def save(self, path, ensure_ascii=False, indent=4, **kwargs):
+    def save(self, path, create_path=True, ensure_ascii=False, indent=4, **kwargs):
         """
         Save the JSON Composed object to a file.
         Arguments
         ---------
             path: full path where to store the output file
+            create_path: if True, then path to file will be created if doesn't exist
             ensure_ascii: if you want to handle unicode values
             indent: number of indents (default 4)
         """
+        _path = Path(path).resolve()
+
+        if create_path is True:
+            _path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(path, "w") as file:
             json.dump(
