@@ -39,6 +39,8 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     'import pytz', \
     'import json', \
     'import re', \
+    'import os', \
+    'from pathlib import Path', \
     'import requests', \
     'from bs4 import BeautifulSoup', \
     'from unicodedata import normalize', \
