@@ -1,6 +1,10 @@
 from functools import wraps
 
 
+class dummy:
+    pass
+
+
 def catch_exceptions(func):
     """
     When applied on a function, prevent it from throwing exceptions, if argument 'fail_silently' is set to True (False by default)
@@ -49,6 +53,10 @@ def return_value_on_exception(value, exception):
                 try:
                     return func(*args, **kwargs)
                 except exception:
+                    if (
+                        selected_return_value := kwargs.get("value_on_exception", dummy)
+                    ) is not dummy:
+                        return selected_return_value
                     return value
             else:
                 return func(*args, **kwargs)

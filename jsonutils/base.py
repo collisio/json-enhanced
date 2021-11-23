@@ -938,7 +938,9 @@ class JSONCompose(JSONNode):
                     item._remove_annotations()
 
     @return_value_on_exception(empty, (IndexError, KeyError))
-    def eval_path(self, path, fail_silently=False, native_types_=False):
+    def eval_path(
+        self, path, fail_silently=False, native_types_=False, value_on_exception=None
+    ):
         """
         Evaluate JSONCompose object over a jsonpath.
 
@@ -948,6 +950,7 @@ class JSONCompose(JSONNode):
             fail_silently: if True, it will return empty in case of errors (missing paths).
             native_types_: if True, then the result will be a Python object whenever a right path is found,
                            instead of a JSONNode object.
+            value_on_exception: the value which will be returned on errors, if fail_silently is True (by default, empty)
         """
         if isinstance(path, JSONPath):
             path = path.keys

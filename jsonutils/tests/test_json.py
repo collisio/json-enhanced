@@ -1185,3 +1185,15 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             test.eval_path(("A", "A"), fail_silently=True), empty
         )  # not raises an error if fail_silently is True
+        self.assertEqual(
+            test.eval_path(("A", "A"), fail_silently=True, value_on_exception=99), 99
+        )
+        self.assertEqual(
+            test.eval_path(("A", "A"), fail_silently=True, value_on_exception=0), 0
+        )
+        self.assertEqual(
+            test.eval_path((0, 0), fail_silently=True, value_on_exception=""), ""
+        )
+        self.assertEqual(
+            test.eval_path((0, 0), fail_silently=True, value_on_exception=None), None
+        )
