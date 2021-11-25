@@ -520,7 +520,7 @@ class JSONNode:
         return output_dict if not flat else list(output_dict.values())[0]
 
     def __str__(self):
-        return self.json_encode(indent=4)
+        return self.json_encode(indent=4, ensure_ascii=False)
 
     # ---- ACTION METHODS ----
     def gt_action(self, other):
@@ -939,7 +939,7 @@ class JSONCompose(JSONNode):
 
     @return_value_on_exception(empty, (IndexError, KeyError))
     def eval_path(
-        self, path, fail_silently=False, native_types_=False, value_on_exception=None
+        self, path, fail_silently=False, native_types_=None, value_on_exception=None
     ):
         """
         Evaluate JSONCompose object over a jsonpath.
@@ -959,6 +959,9 @@ class JSONCompose(JSONNode):
                 path = tuple(JSONPath._cast_to_int(i) for i in path.split("/") if i)
             else:
                 path = (path,)
+
+        if native_types_ is None:
+            native_types_ = config.native_types
 
         if not isinstance(path, (tuple, list)):
             raise TypeError(
