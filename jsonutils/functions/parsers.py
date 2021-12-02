@@ -16,6 +16,17 @@ from jsonutils.query import All, AllChoices, ExtractYear, I, QuerySet, ValuesLis
 from jsonutils.utils.retry import retry_function
 from jsonutils.utils.urls import join_paths
 
+_DEFAULT_UNITS_FACTOR_DICT = {
+    "k": int(1e3),
+    "K": int(1e3),
+    "m": int(1e6),
+    "M": int(1e6),
+    "million": int(1e6),
+    "millions": int(1e6),
+    "Million": int(1e6),
+    "Millions": int(1e6),
+}
+
 
 def _parse_query(node, include_parent_, **q):
     """
@@ -311,12 +322,15 @@ def parse_float(
     decimal_sep=decimal_separator,
     thousands_sep=thousands_separator,
     fail_silently=False,
+    units_factor_dict=None,
 ):
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
     if isinstance(s, bool):
         raise JSONSingletonException("s argument cannot be boolean type")
+    if units_factor_dict is None:
+        units_factor_dict = _DEFAULT_UNITS_FACTOR_DICT
     try:
         result = float(s)
     except Exception:
@@ -327,7 +341,7 @@ def parse_float(
         else:
             return result
     match = re.fullmatch(
-        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*\w{{,6}}\.?\s*",
+        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*(\w{{,8}})\.?\s*",
         s,
     )
     if not match:
@@ -344,8 +358,12 @@ def parse_float(
     number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
     number_right = groups[3] or ""  # right of decimal sep
     number_right = number_right.replace(decimal_sep, ".")
+    word = groups[4]
 
-    return float("".join((sign, number_left, number_right)))
+    factor = units_factor_dict.get(word, 1)
+
+    result = float("".join((sign, number_left, number_right))) * factor
+    return result
 
 
 @catch_exceptions
@@ -355,12 +373,15 @@ def parse_int(
     decimal_sep=decimal_separator,
     thousands_sep=thousands_separator,
     fail_silently=False,
+    units_factor_dict=None,
 ):
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
     if isinstance(s, bool):
         raise JSONSingletonException("s argument cannot be boolean type")
+    if units_factor_dict is None:
+        units_factor_dict = _DEFAULT_UNITS_FACTOR_DICT
     try:
         result = int(s)
     except Exception:
@@ -373,7 +394,7 @@ def parse_int(
         else:
             return result
     match = re.fullmatch(
-        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)(\d+(?:\d|{thousands_sep}\d+)*)(?:\w|\s|\$|€){{,6}}\.?\s*",
+        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)(\d+(?:\d|{thousands_sep}\d+)*)\s*[\$€]*(\w{{,8}})\.?\s*",
         s,
     )
     if not match:
@@ -386,8 +407,11 @@ def parse_int(
     groups = match.groups()
     sign = groups[0] or groups[1] or ""
     number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
+    word = groups[3]
 
-    return int("".join((sign, number_left)))
+    factor = units_factor_dict.get(word, 1)
+    result = int("".join((sign, number_left))) * factor
+    return result
 
 
 @catch_exceptions
@@ -829,3 +853,7 @@ def _parse_html_table(table, parse_links, link_prefix):
     result = base.JSONObject([dict(zip(h, i)) for i in d])
 
     return result
+
+
+if __name__ == "__main__":
+    parse_int("  - $2 USD")
