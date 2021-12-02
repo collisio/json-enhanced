@@ -406,6 +406,7 @@ class QuerySet(list):
             self._list_of_root_nodes
         ):  # If we are dealing with a list of root nodes, we must call the query function of each of them
             for item in self:
+                item = base.JSONObject(item)
                 if item.query(**q).exists():
                     output.append(item)
             return output

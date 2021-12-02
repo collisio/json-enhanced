@@ -176,7 +176,7 @@ class JSONObject:
             raise_exception: if True, then an exception will be raised if data type is not known. Otherwise, a JSONUnknown
                 instance will be created for such a data.
             serialize_nodes: if True and data represents a node instance, then take it as a raw data, discarding
-                all its old node attributes.
+                all its old node attributes (like jsonpath, parent, etc).
         """
         if not isinstance(raise_exception, bool):
             raise TypeError(
@@ -1043,7 +1043,7 @@ class JSONCompose(JSONNode):
         if queryset.exists():
             errors = [
                 {
-                    item._key: {"path": item.jsonpath.data, "type": item._type}
+                    item._key: {"path": item.jsonpath.keys, "type": item._type}
                     for item in queryset
                 }
             ]

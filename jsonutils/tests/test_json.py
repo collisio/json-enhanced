@@ -123,7 +123,7 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(test2.data, JSONUnknown)
         self.assertEqual(
             test2.check_valid_types(),
-            (False, [{"data": {"path": "data", "type": type}}]),
+            (False, [{"data": {"path": ("data",), "type": type}}]),
         )
 
     def test_types(self):
@@ -1197,3 +1197,17 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             test.eval_path((0, 0), fail_silently=True, value_on_exception=None), None
         )
+
+    def test_filter(self):
+        test_queryset = QuerySet(
+            [JSONObject(dict(A=dict(B=1))), dict(A=dict(B=2)), dict(C=1)],
+            list_of_root_nodes=True,
+        )
+        self.assertEqual(
+            test_queryset.filter(B=1), QuerySet([JSONObject(dict(A=dict(B=1)))])
+        )
+        self.assertEqual(
+            test_queryset.filter(B__gte=1),
+            QuerySet([JSONObject(dict(A=dict(B=1))), JSONObject(dict(A=dict(B=2)))]),
+        )
+        self.assertEqual(test_queryset.filter(C=All), [dict(C=1)])
