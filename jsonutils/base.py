@@ -19,7 +19,7 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
-from jsonutils.functions.decorators import return_value_on_exception
+from jsonutils.functions.decorators import catch_exceptions, return_value_on_exception
 from jsonutils.functions.parsers import (
     _parse_html_table,
     _parse_query,
@@ -518,6 +518,10 @@ class JSONNode:
                         break
 
         return output_dict if not flat else list(output_dict.values())[0]
+
+    @catch_exceptions
+    def apply(self, func, fail_silently=False):
+        return func(self)
 
     def __str__(self):
         return self.json_encode(indent=4, ensure_ascii=False)

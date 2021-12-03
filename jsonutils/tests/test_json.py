@@ -1211,3 +1211,10 @@ class JsonTest(unittest.TestCase):
             QuerySet([JSONObject(dict(A=dict(B=1))), JSONObject(dict(A=dict(B=2)))]),
         )
         self.assertEqual(test_queryset.filter(C=All), [dict(C=1)])
+
+    def test_apply(self):
+        test = self.test1
+        test2 = JSONObject({"A": 1, "B": {"C": 2, "D": 3}})
+
+        self.assertEqual(test.query(Float=All).apply(lambda x: x + 1), [3.3, 1])
+        self.assertEqual(test2.query(D=All).apply(lambda x: x + x.parent.C), [5])

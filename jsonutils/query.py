@@ -394,7 +394,6 @@ class QuerySet(list):
             return unique_values
 
     def filter(self, **q):
-        # TODO add test
 
         cls = self.__class__
 
@@ -503,6 +502,18 @@ class QuerySet(list):
         result._root = self._root
         result._native_types = self._native_types
         return result
+
+    def apply(self, func, fail_silently=False):
+
+        cls = self.__class__
+
+        output = cls()
+        output._root = self._root
+        output._native_types = self._native_types
+
+        for item in self:
+            output.append(item.apply(func, fail_silently=fail_silently))
+        return output
 
     # ---- GROUP OPERATIONS ----
     def sum(self):
