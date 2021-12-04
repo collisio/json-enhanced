@@ -12,7 +12,7 @@ import requests
 from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 from jsonutils.functions.decorators import catch_exceptions, return_str_or_datetime
-from jsonutils.query import All, AllChoices, ExtractYear, I, QuerySet, ValuesList
+from jsonutils.query import All, AllChoices, ExtractYear, I, QuerySet
 from jsonutils.utils.retry import retry_function
 from jsonutils.utils.urls import join_paths
 
@@ -854,7 +854,3 @@ def _parse_html_table(table, parse_links, link_prefix):
     result = base.JSONObject([dict(zip(h, i)) for i in d])
 
     return result
-
-
-if __name__ == "__main__":
-    parse_int("  - $2 USD")

@@ -7,6 +7,7 @@ import jsonutils.base as base
 import jsonutils.config as config
 import jsonutils.functions.parsers as parsers
 from jsonutils.exceptions import JSONQueryException
+from jsonutils.functions.decorators import return_native_types
 from jsonutils.utils.dict import ValuesDict
 
 
@@ -243,33 +244,31 @@ class QuerySet(list):
         _list_of_root_nodes: if this is a list of root nodes, coming from a parsed json instead of from a query
     """
 
-    def __init__(self, *args, list_of_root_nodes=False):
-        super().__init__(*args)
+    def __init__(self, args=None, list_of_root_nodes=False):
+        if not args:
+            args = ()
+        jsonobject_generator = map(base.JSONObject, args)
+        super().__init__(jsonobject_generator)
         self._root = None
         self._native_types = None
         self._list_of_root_nodes = list_of_root_nodes
 
+    @return_native_types
     def first(self):
 
         try:
-            result = self.__getitem__(0)
+            return self.__getitem__(0)
         except IndexError:
-            return
-        if not self._native_types:
-            return result
-        else:  # if native_types_ is selected
-            return result._data
+            return base.JSONNull(None)
 
+    @return_native_types
     def last(self):
 
         try:
             result = self.__getitem__(-1)
         except IndexError:
-            return
-        if not self._native_types:
-            return result if self.__len__() > 0 else None
-        else:  # if native_types_ is selected
-            return result._data if self.__len__() > 0 else None
+            return base.JSONNull(None)
+        return result if self.__len__() > 0 else base.JSONNull(None)
 
     def exists(self):
         return True if self.__len__() > 0 else False

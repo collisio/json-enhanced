@@ -64,3 +64,16 @@ def return_value_on_exception(value, exception):
         return wrapper
 
     return decorator
+
+
+def return_native_types(func):
+    """ """
+
+    @wraps(func)
+    def wrapper(self):
+        res = func(self)
+        if self._native_types:
+            return res._data
+        return res
+
+    return wrapper

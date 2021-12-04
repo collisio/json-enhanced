@@ -521,7 +521,10 @@ class JSONNode:
 
     @catch_exceptions
     def apply(self, func, fail_silently=False):
-        return func(self)
+        res = func(self)
+        if isinstance(res, JSONNode):
+            res = res._data
+        return res
 
     def __str__(self):
         return self.json_encode(indent=4, ensure_ascii=False)

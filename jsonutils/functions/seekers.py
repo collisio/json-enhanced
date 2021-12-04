@@ -560,6 +560,10 @@ class DefaultDict(dict):
 
 
 class DefaultTuple(tuple):
+    """
+    Like a tuple, but returning None if getting an index out of range.
+    """
+
     def __getitem__(self, idx):
         try:
             return super().__getitem__(idx)
@@ -595,8 +599,3 @@ def _relative_to(child_path, parent_path):
             output += child_path[i:]
             break
     return output
-
-
-# if __name__ == "__main__":
-#     x = _relative_to((), ())
-#     print(x)
