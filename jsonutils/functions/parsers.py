@@ -423,6 +423,7 @@ def parse_datetime(
     only_date=False,
     fail_silently=False,
     return_string=False,
+    is_timestamp=False,
     tzone="utc",
 ):
     """
@@ -434,6 +435,19 @@ def parse_datetime(
         for arg in (only_check, tzone_aware, only_date, fail_silently, return_string)
     ):
         raise TypeError("Invalid type arguments. All keyword arguments must be boolean")
+
+    if only_check and is_timestamp:
+        raise ValueError("Cannot set both `only_check` and `is_timestamp` to True")
+
+    if is_timestamp and parse_int(s, only_check=True):
+        parsed_datetime = datetime.fromtimestamp(parse_int(s))
+        if tzone_aware:
+            parsed_datetime = parsed_datetime.replace(tzinfo=pytz.timezone(tzone))
+        if only_date:
+            parsed_datetime = parsed_datetime.replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+        return parsed_datetime
 
     if isinstance(s, (date, datetime)):
         if only_check:
