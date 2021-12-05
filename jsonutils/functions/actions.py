@@ -626,7 +626,7 @@ def _startswith(node, requested_value):
 
 def _endswith(node, requested_value):
     """
-    This method analyzes whether a given JSONObject starts with target requested_value
+    This method analyzes whether a given JSONObject ends with target requested_value
     """
 
     if not isinstance(requested_value, (str, int, list, tuple)):
@@ -727,5 +727,17 @@ def _bool(node, requested_value):
         raise TypeError(
             f"Argument 'requested_value' must be a bool, not {type(requested_value)}"
         )
-    
+
     return bool(node) == requested_value
+
+
+def _nchild(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject is an n-child descendant from root
+    """
+    # TODO add test
+    if not isinstance(requested_value, int):
+        raise TypeError(
+            f"Argument 'requested_value' must be a int, not {type(requested_value)}"
+        )
+    return len(node.jsonpath.keys) == requested_value

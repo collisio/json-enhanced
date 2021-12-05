@@ -39,7 +39,12 @@ from jsonutils.functions.seekers import (
     empty,
 )
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
-from jsonutils.utils.dict import UUIDdict, ValuesDict
+from jsonutils.utils.dict import (
+    UUIDdict,
+    ValuesDict,
+    _rename_keys,
+    _rename_keys_inplace,
+)
 from jsonutils.utils.retry import retry_function
 
 
@@ -635,6 +640,11 @@ class JSONNode:
 
         return _bool(self, other)
 
+    def nchild_action(self, other):
+        from jsonutils.functions.actions import _nchild
+
+        return _nchild(self, other)
+
 
 class JSONCompose(JSONNode):
     """
@@ -1156,6 +1166,32 @@ class JSONDict(dict, JSONCompose):
             return list(self.keys())
         else:
             return list(self.keys()) + super().__dir__()
+
+    def rename_keys(self, dic=None, inplace=False, **kwargs):
+        if dic is not None:
+            if not isinstance(dic, dict):
+                raise TypeError(
+                    f"Argument 'dic' must be a dict instance, not {type(dic)}"
+                )
+            if kwargs:
+                raise ValueError(
+                    "The two input arguments `dic` and `kwargs` cannot be passed at the same time"
+                )
+            if inplace:
+                _rename_keys_inplace(self, dic)
+                return
+            else:
+                return _rename_keys(self, dic)
+        else:
+            if not kwargs:
+                raise ValueError(
+                    "You must set one of the two arguments: `dic` or `kwargs`"
+                )
+            if inplace:
+                _rename_keys_inplace(self, kwargs)
+                return
+            else:
+                return _rename_keys(self, kwargs)
 
     def __getattr__(self, name):
         try:

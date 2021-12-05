@@ -1218,3 +1218,20 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test.query(Float=All).apply(lambda x: x + 1), [3.3, 1])
         self.assertEqual(test2.query(D=All).apply(lambda x: x + x.parent.C), [5])
+
+    def test_rename_keys(self):
+        test = JSONObject(dict(A=1, B=dict(C=2, D=3)))
+
+        self.assertDictEqual(test.rename_keys(A="newA"), dict(newA=1, B=dict(C=2, D=3)))
+        self.assertDictEqual(test.rename_keys(B="newB"), dict(A=1, newB=dict(C=2, D=3)))
+        self.assertDictEqual(
+            test.rename_keys({"A": "newA"}), dict(newA=1, B=dict(C=2, D=3))
+        )
+        self.assertDictEqual(
+            test.rename_keys({"fake": "newA"}), dict(A=1, B=dict(C=2, D=3))
+        )
+
+        test.rename_keys(A="newAinplace", inplace=True)
+
+        self.assertDictEqual(test, dict(newAinplace=1, B=dict(C=2, D=3)))
+        self.assertEqual(test.newAinplace.jsonpath.keys, ("newAinplace",))

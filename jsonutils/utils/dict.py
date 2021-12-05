@@ -1,5 +1,7 @@
 from collections.abc import KeysView
 
+import jsonutils.base as base
+
 
 class UUIDdict(dict):
     """
@@ -76,3 +78,16 @@ class FlagsDict:
                 if generator
                 else [self.dict[x] for x in self.dict if x & num]
             )
+
+
+def _rename_keys_inplace(obj, rename_dict):
+    for k, v in rename_dict.items():
+        if k in obj.keys():
+            original_value = obj.pop(k)
+            obj[v] = original_value
+
+
+def _rename_keys(obj, rename_dict):
+    rename_dict = TranslationDict(rename_dict)
+    result = {rename_dict[k]: v for k, v in obj.items()}
+    return base.JSONObject(result)
