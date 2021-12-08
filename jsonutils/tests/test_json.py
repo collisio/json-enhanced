@@ -1113,6 +1113,19 @@ class JsonTest(unittest.TestCase):
             QuerySet([]),
         )
 
+    def test_get_key(self):
+        test = self.test5
+
+        self.assertEqual(test.get_key(js.I("flo.*"), exact="1.1"), 1.1)
+        self.assertEqual(
+            test.get_key("Lis.*", __1=True), JSONList([None, True, False, 1])
+        )
+        self.assertEqual(
+            test.get_key(js.I("flo.*"), gte="1", throw_exceptions_=False), 1.1
+        )
+        self.assertRaises(JSONQueryMultipleValues, lambda: test.get_key("Flo.*", gte=1))
+        self.assertRaises(JSONQueryException, lambda: test.get_key("FakeKey"))
+
     def test_traverse_json(self):
         # TODO what if a key has an explicit "
         test = JSONObject([{"A": 1, "B": {"B1": 2, "B2": [3, 4]}}])

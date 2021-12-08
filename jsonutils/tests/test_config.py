@@ -1,7 +1,9 @@
 import unittest
 
 import jsonutils as js
-from jsonutils.base import JSONBool, JSONDict, JSONList, JSONNull
+from jsonutils.base import JSONBool, JSONDict, JSONInt, JSONList, JSONNull
+from jsonutils.exceptions import JSONQueryMultipleValues
+from jsonutils.functions.decorators import global_config
 
 
 class JsonTest(unittest.TestCase):
@@ -34,3 +36,39 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(type(test.query(B=None).order_by("B").first()), type(None))
         self.assertEqual(type(test.query(D__type=dict).order_by("D").first()), dict)
         self.assertEqual(type(test.query(L__type=list).order_by("L").first()), list)
+
+    def test_global_config(self):
+        test = js.JSONObject([dict(A=1, B=2), dict(A=1, B=3)])
+
+        @global_config
+        def native_true_exceptions_false(data):
+            return data.get(A=1)
+
+        @global_config(native_types=False, query_exceptions=False)
+        def native_false_exceptions_false(data):
+            return data.get(A=1)
+
+        @global_config(native_types=False, query_exceptions=True)
+        def native_false_exceptions_true(data):
+            return data.get(A=1)
+
+        @global_config(native_types=True, query_exceptions=False, include_parents=True)
+        def native_true_exceptions_false_include_parents_true(data):
+            return data.get(A=1)
+
+        self.assertEqual(native_true_exceptions_false(test), 1)
+        self.assertNotIsInstance(native_true_exceptions_false(test), JSONInt)
+
+        self.assertEqual(native_false_exceptions_false(test), 1)
+        self.assertIsInstance(native_false_exceptions_false(test), JSONInt)
+
+        self.assertRaises(
+            JSONQueryMultipleValues, lambda: native_false_exceptions_true(test)
+        )
+
+        self.assertEqual(
+            native_true_exceptions_false_include_parents_true(test), {"A": 1, "B": 2}
+        )
+        self.assertNotIsInstance(
+            native_true_exceptions_false_include_parents_true(test), JSONDict
+        )

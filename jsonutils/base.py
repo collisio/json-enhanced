@@ -940,6 +940,47 @@ class JSONCompose(JSONNode):
                 )
         return queryset
 
+    def get_key(
+        self,
+        pattern,
+        recursive_=None,
+        include_parent_=None,
+        throw_exceptions_=None,
+        native_types_=None,
+        **q,
+    ):
+        # ---- DYNAMIC CONFIG ----
+        if recursive_ is None:
+            recursive_ = config.recursive_queries
+        if include_parent_ is None:
+            include_parent_ = config.include_parents
+        if throw_exceptions_ is None:
+            throw_exceptions_ = config.query_exceptions
+        if native_types_ is None:
+            native_types_ = config.native_types
+        # ------------------------
+        query = self.query_key(
+            pattern,
+            recursive_=recursive_,
+            include_parent_=include_parent_,
+            stop_at_match_=2,
+            native_types_=native_types_,
+            **q,
+        )
+
+        if not query.exists():
+            if throw_exceptions_:
+                raise JSONQueryException("The query has not returned any result")
+            else:
+                return None if native_types_ else JSONNull(None)
+        elif query.count() > 1:
+            if throw_exceptions_:
+                raise JSONQueryMultipleValues("More than one value returned by query")
+            else:
+                return query.first()
+        else:
+            return query.first()
+
     def _remove_annotations(self, recursive=True):
 
         if isinstance(self, JSONDict):
