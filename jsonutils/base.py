@@ -19,7 +19,11 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
-from jsonutils.functions.decorators import catch_exceptions, return_value_on_exception
+from jsonutils.functions.decorators import (
+    catch_exceptions,
+    dummy,
+    return_value_on_exception,
+)
 from jsonutils.functions.parsers import (
     _parse_html_table,
     _parse_query,
@@ -784,6 +788,7 @@ class JSONCompose(JSONNode):
         include_parent_=None,
         throw_exceptions_=None,
         native_types_=None,
+        default_=dummy,
         **q,
     ):
 
@@ -806,6 +811,8 @@ class JSONCompose(JSONNode):
         )
 
         if not query.exists():
+            if default_ != dummy:
+                return default_
             if throw_exceptions_:
                 raise JSONQueryException("The query has not returned any result")
             else:
@@ -947,6 +954,7 @@ class JSONCompose(JSONNode):
         include_parent_=None,
         throw_exceptions_=None,
         native_types_=None,
+        default_=dummy,
         **q,
     ):
         # ---- DYNAMIC CONFIG ----
@@ -969,6 +977,8 @@ class JSONCompose(JSONNode):
         )
 
         if not query.exists():
+            if default_ != dummy:
+                return default_
             if throw_exceptions_:
                 raise JSONQueryException("The query has not returned any result")
             else:

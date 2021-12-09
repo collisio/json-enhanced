@@ -367,6 +367,7 @@ class JsonTest(unittest.TestCase):
             test.get(timestamp="2021-05-01 08:00:00"),
             test.query(timestamp="2021-05-01 08:00:00").first(),
         )
+        self.assertEqual(test.get(fakeee=1, default_=5), 5)
 
         self.assertRaises(JSONQueryMultipleValues, lambda: test.get(pos__0=1))
 
@@ -1123,6 +1124,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             test.get_key(js.I("flo.*"), gte="1", throw_exceptions_=False), 1.1
         )
+        self.assertEqual(test.get_key("FAKEKEY", default_=5), 5)
         self.assertRaises(JSONQueryMultipleValues, lambda: test.get_key("Flo.*", gte=1))
         self.assertRaises(JSONQueryException, lambda: test.get_key("FakeKey"))
 
