@@ -426,6 +426,8 @@ def _type(node, requested_value):
     """
     This method analyzes whether a given JSONObject has requested type.
     """
+    NUMERIC_TYPES = ("number", "numeric", "numerical")
+
     if requested_value not in (
         dict,
         list,
@@ -444,12 +446,10 @@ def _type(node, requested_value):
         "bool",
         "None",
         "singleton",
-        "number",
-        "numeric",
-        "numerical",
         "url",
         "web",
         "unknown",
+        *NUMERIC_TYPES,
     ):
         raise JSONQueryException(
             f"Requested value must be a valid type, not {requested_value}"
@@ -484,14 +484,14 @@ def _type(node, requested_value):
         else:
             return False
     elif isinstance(node, JSONFloat):
-        if requested_value in (float, "float", "number"):
+        if requested_value in (float, "float", *NUMERIC_TYPES):
             return True
         elif requested_value == "singleton":
             return True
         else:
             return False
     elif isinstance(node, JSONInt):
-        if requested_value in (int, "int", "number"):
+        if requested_value in (int, "int", *NUMERIC_TYPES):
             return True
         elif requested_value == "singleton":
             return True
@@ -507,7 +507,7 @@ def _type(node, requested_value):
                 return True
             else:
                 return False
-        elif requested_value in ("number", "numeric", "numerical"):
+        elif requested_value in NUMERIC_TYPES:
             if node.to_float(only_check=True):
                 return True
             else:

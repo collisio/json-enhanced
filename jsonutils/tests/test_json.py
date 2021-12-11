@@ -1072,6 +1072,7 @@ class JsonTest(unittest.TestCase):
     def test_query_keys(self):
 
         test = JSONObject({"name": {"NAME": "Dan", "name": True}})
+        test2 = JSONObject(dict(A=0, B="012"))
 
         self.assertListEqual(
             test.query_key(js.I(".*na.*")).distinct(lambda x: x._key).keys(),
@@ -1113,6 +1114,7 @@ class JsonTest(unittest.TestCase):
             ),
             QuerySet([]),
         )
+        self.assertEqual(test2.query_key("*", type__="numeric"), [0, "012"])
 
     def test_get_key(self):
         test = self.test5
