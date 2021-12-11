@@ -502,16 +502,21 @@ class QuerySet(list):
         result._native_types = self._native_types
         return result
 
-    def apply(self, func, fail_silently=False):
+    def apply(self, func, throw_exceptions_=None):
 
         cls = self.__class__
+
+        # ---- DYNAMIC CONFIG ----
+        if throw_exceptions_ is None:
+            throw_exceptions_ = config.query_exceptions
+        # ------------------------
 
         output = cls()
         output._root = self._root
         output._native_types = self._native_types
 
         for item in self:
-            output.append(item.apply(func, fail_silently=fail_silently))
+            output.append(item.apply(func, throw_exceptions_=throw_exceptions_))
         return output
 
     # ---- GROUP OPERATIONS ----

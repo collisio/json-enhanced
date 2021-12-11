@@ -528,9 +528,22 @@ class JSONNode:
 
         return output_dict if not flat else list(output_dict.values())[0]
 
-    @catch_exceptions
-    def apply(self, func, fail_silently=False):
-        res = func(self)
+    def apply(self, func, throw_exceptions_=None):
+        """
+        Apply a function over a JSONNode. Always return native python types.
+        """
+
+        # ---- DYNAMIC CONFIG ----
+        if throw_exceptions_ is None:
+            throw_exceptions_ = config.query_exceptions
+        # ------------------------
+        try:
+            res = func(self)
+        except Exception:
+            if throw_exceptions_:
+                raise
+            else:
+                return
         if isinstance(res, JSONNode):
             res = res._data
         return res
