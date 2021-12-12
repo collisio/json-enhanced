@@ -8,8 +8,8 @@ from jsonutils.functions.decorators import global_config
 
 class JsonTest(unittest.TestCase):
     def setUp(self):
-        js.config.native_types = False
-        js.config.query_exceptions = False
+        js.config.NATIVE_TYPES = False
+        js.config.QUERY_EXCEPTIONS = False
 
     def test_native_types(self):
         test = js.JSONObject(
@@ -20,7 +20,7 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(test.get(D=js.All), JSONDict)
         self.assertIsInstance(test.get(L=js.All), JSONList)
 
-        js.config.native_types = True
+        js.config.NATIVE_TYPES = True
 
         self.assertEqual(test.get(A=js.All).__class__, bool)
         self.assertEqual(test.get(B=js.All).__class__, type(None))

@@ -9,7 +9,7 @@ from json import JSONDecoder
 import jsonutils.base as base
 import pytz
 import requests
-from jsonutils.config.locals import decimal_separator, thousands_separator
+import jsonutils.config as config
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 from jsonutils.functions.decorators import catch_exceptions, return_str_or_datetime
 from jsonutils.query import All, AllChoices, ExtractYear, I, QuerySet
@@ -319,11 +319,18 @@ def _parse_query_key(node, pattern, include_parent_, **q):
 def parse_float(
     s,
     only_check=False,
-    decimal_sep=decimal_separator,
-    thousands_sep=thousands_separator,
+    decimal_sep=None,
+    thousands_sep=None,
     fail_silently=False,
     units_factor_dict=None,
 ):
+
+    # ---- DYNAMIC CONFIG ----
+    if decimal_sep is None:
+        decimal_sep = config.DECIMAL_SEPARATOR
+    if thousands_sep is None:
+        thousands_sep = config.THOUSANDS_SEPARATOR
+    # ------------------------
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
@@ -370,11 +377,18 @@ def parse_float(
 def parse_int(
     s,
     only_check=False,
-    decimal_sep=decimal_separator,
-    thousands_sep=thousands_separator,
+    decimal_sep=None,
+    thousands_sep=None,
     fail_silently=False,
     units_factor_dict=None,
 ):
+
+    # ---- DYNAMIC CONFIG ----
+    if decimal_sep is None:
+        decimal_sep = config.DECIMAL_SEPARATOR
+    if thousands_sep is None:
+        thousands_sep = config.THOUSANDS_SEPARATOR
+    # ------------------------
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")

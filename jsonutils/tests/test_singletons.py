@@ -18,6 +18,7 @@ from jsonutils.base import (
 )
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONSingletonException
+from jsonutils.functions.decorators import global_config
 from jsonutils.functions.parsers import parse_datetime, parse_float, parse_int
 from jsonutils.query import QuerySet
 
@@ -336,3 +337,14 @@ class JsonTest(unittest.TestCase):
         self.assertTrue(
             parse_datetime("05-26-2021", only_check=True)
         )  # because pattern matches a datetime
+
+    def test_attribute_accession(self):
+
+        self.assertIsInstance(JSONNull(None).fake, JSONNull)
+        self.assertIsInstance(JSONNull(None).fake.foke._0.a, JSONNull)
+
+        @global_config(native_types=True)
+        def test_func(data):
+            return data.fake_name
+
+        self.assertIsNone(test_func(JSONObject({"A": 1})))

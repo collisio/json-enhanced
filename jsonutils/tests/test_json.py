@@ -32,8 +32,8 @@ BASE_PATH = Path(js.__file__).parent.resolve()
 class JsonTest(unittest.TestCase):
     def setUp(self):
 
-        js.config.native_types = False
-        js.config.query_exceptions = True
+        js.config.NATIVE_TYPES = False
+        js.config.QUERY_EXCEPTIONS = True
 
         self.test1 = JSONObject(
             [
@@ -876,7 +876,8 @@ class JsonTest(unittest.TestCase):
 
         self.assertSetEqual(set(test.data._0._child_objects.values()), {30})
         self.assertFalse(test.query(name=All).exists())
-        self.assertIsNone(test.data._0.name)
+        self.assertEqual(test.data._0.name, JSONNull(None))
+        self.assertIsInstance(test.data._0.name, JSONNull)
 
     def test_multiparent(self):
         test = JSONObject(
@@ -923,7 +924,7 @@ class JsonTest(unittest.TestCase):
 
     def test_values(self):
 
-        js.config.query_exceptions = False
+        js.config.QUERY_EXCEPTIONS = False
 
         test = JSONObject(
             {

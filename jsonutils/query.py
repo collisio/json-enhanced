@@ -508,7 +508,7 @@ class QuerySet(list):
 
         # ---- DYNAMIC CONFIG ----
         if throw_exceptions_ is None:
-            throw_exceptions_ = config.query_exceptions
+            throw_exceptions_ = config.QUERY_EXCEPTIONS
         # ------------------------
 
         output = cls()

@@ -1,9 +1,9 @@
-from .completion import autocomplete_only_nodes
-from .locals import decimal_separator, thousands_separator
+from .completion import AUTOCOMPLETE_ONLY_NODES
+from .locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from .queries import (
-    clever_parsing,
-    include_parents,
-    native_types,
-    query_exceptions,
-    recursive_queries,
+    CLEVER_PARSING,
+    INCLUDE_PARENTS,
+    NATIVE_TYPES,
+    QUERY_EXCEPTIONS,
+    RECURSIVE_QUERIES,
 )

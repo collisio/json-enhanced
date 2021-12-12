@@ -107,8 +107,14 @@ def global_config(fun=None, **config_kw):
         JSONQueryMultipleValues: More than one value returned by query
     """
 
+    def upper(s):
+        return s.upper()
+
     if not config_kw:
         config_kw = dict(native_types=True, query_exceptions=False)
+
+    # set uppercase, because config uses it
+    config_kw = {upper(k): v for k, v in config_kw.items()}
 
     def _set_config(dic):
         for k, v in dic.items():
