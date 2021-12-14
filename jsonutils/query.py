@@ -535,6 +535,40 @@ class QuerySet(list):
             result += number
         return result
 
+    def mean(self):
+        """Average of queryset numbers"""
+        # TODO add test
+        if self._list_of_root_nodes:
+            return
+
+        if not self.exists():
+            return
+
+        cumulative_sum = 0
+        length = 0
+        for item in self:
+            try:
+                number = parsers.parse_float(item)
+            except Exception:
+                continue
+            else:
+                cumulative_sum += number
+                length += 1
+        return cumulative_sum / length
+
+    def values_count(self):
+        """Count unique values in queryset"""
+        # TODO add test
+        if not self.exists():
+            return
+
+        distinct_values = self.distinct()
+
+        output = []
+        for item in distinct_values:
+            output.append((item._data, super().count(item)))
+        return output
+
     def __repr__(self):
         clsname = self.__class__.__name__
         return f"<{clsname} " + super().__repr__() + ">"
