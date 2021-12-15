@@ -1184,6 +1184,7 @@ class JsonTest(unittest.TestCase):
 
     def test_eval_path(self):
         test = JSONObject({"A": {"B": [{"C": 1}]}})
+        test2 = JSONObject(dict(A=1))
 
         self.assertTrue(test.eval_path(("A",)), {"B": [{"C": 1}]})
         self.assertTrue(test.eval_path("A", {"B": [{"C": 1}]}))
@@ -1214,6 +1215,10 @@ class JsonTest(unittest.TestCase):
         )
         self.assertEqual(
             test.eval_path((0, 0), fail_silently=True, value_on_exception=None), None
+        )
+        self.assertEqual(test2.eval_path(("A", 1), fail_silently=True), empty)
+        self.assertEqual(
+            test2.eval_path(("A", 1, 0, "B", 3), fail_silently=True), empty
         )
 
     def test_filter(self):

@@ -1019,7 +1019,7 @@ class JSONCompose(JSONNode):
                 if item.is_composed and recursive:
                     item._remove_annotations()
 
-    @return_value_on_exception(empty, (IndexError, KeyError))
+    @return_value_on_exception(empty, (IndexError, KeyError, TypeError))
     def eval_path(
         self, path, fail_silently=False, native_types_=None, value_on_exception=None
     ):
@@ -1218,7 +1218,6 @@ class JSONSingleton(JSONNode):
         if config.NATIVE_TYPES:
             return
         return JSONNull(None)
-
 
 
 # ---- COMPOSE OBJECTS ----
