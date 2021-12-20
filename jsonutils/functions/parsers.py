@@ -456,7 +456,8 @@ def parse_datetime(
     if is_timestamp and parse_int(s, only_check=True):
         parsed_datetime = datetime.fromtimestamp(parse_int(s))
         if tzone_aware:
-            parsed_datetime = parsed_datetime.replace(tzinfo=pytz.timezone(tzone))
+            zone = pytz.timezone(tzone)
+            parsed_datetime = zone.localize(parsed_datetime)
         if only_date:
             parsed_datetime = parsed_datetime.replace(
                 hour=0, minute=0, second=0, microsecond=0
@@ -472,7 +473,7 @@ def parse_datetime(
         )  # convert to datetime object
 
         if tzone_aware:
-            if unified_datetime.tzinfo:
+            if unified_datetime.tzinfo:  # already have a tzinfo set
                 return (
                     unified_datetime
                     if not only_date
@@ -483,17 +484,15 @@ def parse_datetime(
                         tzinfo=unified_datetime.tzinfo,
                     )
                 )
-            else:  # if not tzinfo is shown, put utc as default
-                return (
-                    unified_datetime.replace(tzinfo=pytz.timezone(tzone))
-                    if not only_date
-                    else datetime(
-                        unified_datetime.year,
-                        unified_datetime.month,
-                        unified_datetime.day,
-                        tzinfo=pytz.timezone(tzone),
+            else:  # if not tzinfo is shown, put tzone as default
+                zone = pytz.timezone(tzone)
+                if not only_date:
+                    return zone.localize(unified_datetime)
+                else:
+                    return zone.localize(unified_datetime).replace(
+                        hour=0, minute=0, second=0, microsecond=0
                     )
-                )
+
         else:
             return (
                 unified_datetime.replace(tzinfo=None)
@@ -574,17 +573,27 @@ def parse_datetime(
 
             try:
                 if only_date:
-                    return (
-                        datetime(year, month, day, tzinfo=tzone)
-                        if tzone_aware
-                        else datetime(year, month, day)
-                    )
+                    if tzone_aware:
+                        try:
+                            return tzone.localize(datetime(year, month, day))
+                        except AttributeError:
+                            return datetime(year, month, day, tzinfo=tzone)
+                    else:
+                        return datetime(year, month, day)
+
                 else:
-                    return (
-                        datetime(year, month, day, hour, min, sec, tzinfo=tzone)
-                        if tzone_aware
-                        else datetime(year, month, day, hour, min, sec)
-                    )
+                    if tzone_aware:
+                        try:
+                            return tzone.localize(
+                                datetime(year, month, day, hour, min, sec)
+                            )
+                        except AttributeError:
+                            return datetime(
+                                year, month, day, hour, min, sec, tzinfo=tzone
+                            )
+                    else:
+                        return datetime(year, month, day, hour, min, sec)
+
             except Exception as e:
                 if only_check:
                     return True
