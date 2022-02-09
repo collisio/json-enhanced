@@ -69,6 +69,46 @@ def PandasDataFrame():
         return type(None)
 
 
+def NumpyInt64():
+
+    try:
+        return sys.modules["numpy"].int64
+    except Exception:
+        return type(None)
+
+
+def NumpyFloat64():
+
+    try:
+        return sys.modules["numpy"].float64
+    except Exception:
+        return type(None)
+
+
+def NumpyFloat32():
+
+    try:
+        return sys.modules["numpy"].float32
+    except Exception:
+        return type(None)
+
+
+def NumpyFloat16():
+
+    try:
+        return sys.modules["numpy"].float16
+    except Exception:
+        return type(None)
+
+
+def NumpyInt8():
+
+    try:
+        return sys.modules["numpy"].int8
+    except Exception:
+        return type(None)
+
+
 # ----------------------
 
 
@@ -215,6 +255,10 @@ class JSONObject:
             return JSONList(data)
         elif isinstance(data, PandasDataFrame()):
             return JSONDict(json.loads(data.to_json()))
+        elif isinstance(data, (NumpyFloat64(), NumpyFloat32(), NumpyFloat16())):
+            return JSONFloat(data)
+        elif isinstance(data, (NumpyInt64(), NumpyInt8())):
+            return JSONInt(data)
         else:
             if not raise_exception:
                 return JSONUnknown(data)
