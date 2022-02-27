@@ -3,7 +3,7 @@ This module contains the base objects of the JSON structure
 """
 import json
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, time
 from pathlib import Path
 from uuid import uuid4
 
@@ -244,7 +244,7 @@ class JSONObject:
             return JSONBool(data)
         elif isinstance(data, str):
             return JSONStr(data)
-        elif isinstance(data, (date, datetime)):
+        elif isinstance(data, (date, datetime, time)):
             return JSONStr(data.isoformat())
         elif isinstance(data, float):
             return JSONFloat(data)
