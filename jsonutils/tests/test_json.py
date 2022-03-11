@@ -1258,3 +1258,8 @@ class JsonTest(unittest.TestCase):
 
         self.assertDictEqual(test, dict(newAinplace=1, B=dict(C=2, D=3)))
         self.assertEqual(test.newAinplace.jsonpath.keys, ("newAinplace",))
+
+    def test_path_joint(self):
+        self.assertEqual(js.join_paths("a", "b", sep=":"), "a:b")
+        self.assertEqual(js.join_paths("a", 2, "c", sep="/"), "a/2/c")
+        self.assertEqual(js.join_paths(2.3), "2.3")

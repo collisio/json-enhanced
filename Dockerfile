@@ -15,8 +15,11 @@ RUN pip install -U pip && pip install -r requirements.txt
 # copy the content of the local directory to the working directory
 COPY . .
 
+# set ipython environment variable
+ENV IPYTHONDIR=/code/.ipython
+
 # create an Ipython profile to manage default imports
-RUN ipython profile create template --ipython-dir /code/.ipython && \
+RUN ipython profile create template && \
     echo "c.InteractiveShellApp.exec_lines = \
     ['import jsonutils as js', \
     'from jsonutils.base import JSONObject, \
@@ -47,9 +50,6 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     'from unicodedata import normalize', \
     'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \
     ]" >> /code/.ipython/profile_template/ipython_config.py
-
-# set ipython environment variable
-ENV IPYTHONDIR=/code/.ipython
 
 RUN python -m unittest -v
 

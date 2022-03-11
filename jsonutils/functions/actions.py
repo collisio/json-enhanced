@@ -53,8 +53,8 @@ def _gt(node, requested_value):
     """
     Greather than action
 
-           \ req_value  |  dict  |  list/tuple  |  bool  |  float/int  |  str  |  datetime  |  null
-      node  \           |        |              |        |             |       |            |
+             req_value  |  dict  |  list/tuple  |  bool  |  float/int  |  str  |  datetime  |  null
+      node              |        |              |        |             |       |            |
     ================================================================================================
            JSONDict     |    X   |       X      |    X   |      X      |   X   |     X      |   X
                         |        |              |        |             |       |            |
@@ -184,8 +184,8 @@ def _exact(node, requested_value):
     An exact match.
     In an exact match, only same types are checked, except for JSONStr, which is more versatile.
 
-           \ req_value  |  dict  |  list/tuple  |  bool  |  float/int  |  str  |  datetime  |  null
-      node  \           |        |              |        |             |       |            |
+             req_value  |  dict  |  list/tuple  |  bool  |  float/int  |  str  |  datetime  |  null
+      node              |        |              |        |             |       |            |
     ================================================================================================
            JSONDict     |    V   |       X      |    X   |      X      |   X   |     X      |   X
                         |        |              |        |             |       |            |

@@ -6,7 +6,6 @@ def join_paths(*args, sep=None):
     Joins different elements within the same path, using a single separator
     and making sure that it is not repeated as a connecting link.
     """
-    # TODO add test
     if sep is None:
         sep = os.path.sep
 
@@ -16,8 +15,11 @@ def join_paths(*args, sep=None):
     length = len(args)
 
     def _format(s, idx):
-        if isinstance(s, os.PathLike):
+        if isinstance(s, (int, float)):
+            s = str(s)
+        elif isinstance(s, os.PathLike):
             s = os.fspath(s)
+
         if idx == 0:
             return s.rstrip(sep)
         if idx == length - 1:
